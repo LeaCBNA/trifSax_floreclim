@@ -1,0 +1,558 @@
+---
+title: "AERMC/FLORECLIM - Adaptation locale de *Trifolium saxatile* : analyses préliminaires"
+author: "Léa Bizard"
+date: "05/11/2021"
+output: 
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '4'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+library(vegan)
+library(ggplot2)
+library(tidyverse)
+library(forcats)
+
+library(factoextra)
+library(jcolors)
+library(goeveg)
+
+library(ggplot2)
+library(ggrepel)
+library(RColorBrewer)
+library(remedy)
+
+```
+
+# 1. Analyses relevés botaniques 2018 - 2021 plots AERMC
+
+Protocole : relevés botaniques avec abondance exprimée en % absolu (non dégradée en classes). Un relevé à la mise en place des placettes (2018) et un relevé l'année de l'enlèvement des placettes (2021). 
+
+## 1.1 Diversité spécifique
+
+Les listes d'espèces sont dégradées en présence/absence. 
+
+```{r mise en forme 1, results = "hide"}
+dat<-read.table("data_bota_prabs.csv", header=T, sep=";", dec=".")
+
+summary(dat)
+str(dat)
+
+dat<-dat[,c(-1, -22:-37)]
+
+# il y a plusieurs sites qui sont splittes en deux
+# on cree des colonnes pour combiner les deux parties
+
+# Pour Eychauda torrent :
+dat$EYCH_torr_tot <- dat$EYCH_torr_EFG
+
+for (i in 1:nrow(dat)){
+  
+  if (dat[i,9] == 1) 
+    dat[i,21] <- 1
+    else NULL
+ 
+}
+
+
+# Pour Maurienne planay torrent :
+dat$MAUR_torr_tot <- dat$MAUR_planay_torr_ABCD
+
+# for (i in 1:nrow(dat)){
+  
+ # if (dat[i,13] == 1) 
+  #  dat[i,22] <- 1
+  # else NULL
+  
+# }
+
+# Pour Vallouise moraine haut :
+dat$VALL_mor_haut_tot <- dat$VALL_mor_haut_ABCD
+
+for (i in 1:nrow(dat)){
+  
+  if (dat[i,17] == 1) 
+    dat[i,23] <- 1
+  else NULL
+  
+}
+
+
+dat <- dat[,c(-9,-10,-13,-14,-17,-18)] # On enl?ve les colonnes qui ne servent plus
+
+# Creation des data frames par annee
+
+dat_18 <- dat[c(18:122),]
+dat_21 <- dat[c(123:244),]
+
+rownames(dat_18) <- dat_18$species
+dat_18 <- dat_18[,c(-1,-2)]
+
+
+rownames(dat_21) <- dat_21$species
+dat_21 <- dat_21[,c(-1,-2)]
+
+````
+
+
+
+```{r specific diversity}
+
+# on transpose le data frame
+t_dat_18 <- as.data.frame(t(dat_18))
+t_dat_21 <- as.data.frame(t(dat_21))
+
+x <- c("BER_carr","BER_cari","BER_clap","BER_lac1","BER_lac2",
+       "VAL_eyme","MAU_arpo","MAU_plah","VAL_glab","VAL_moba",
+       "VIL_bas","VIL_haut","VAL_eyto","MAU_plto","VAL_moha")
+
+rownames(t_dat_18) <- x
+rownames(t_dat_21) <- x
+
+
+rich_18 <- rowSums(t_dat_18)
+site_18 <- rownames(t_dat_18)
+rich_21 <- rowSums(t_dat_21)
+
+
+richness <- data.frame(site_18, rich_18, rich_21)
+
+
+richness$secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),
+                         "VALLOUISE","MAURIENNE","VALLOUISE")
+richness$secteur <- as.factor(richness$secteur)
+str(richness)
+
+richness_long <- richness %>% pivot_longer(
+  cols = paste0(c("rich_18", "rich_21")), names_to = "year",
+  names_prefix = "rich_", values_to = "rich",
+  values_drop_na = FALSE) 
+
+student_rich <- t.test(rich_18, rich_21, paired = TRUE)
+
+ggplot(richness_long, aes(x = site_18, y = rich, fill = year)) +
+  geom_bar(stat = "identity", width =.4, position=position_dodge(), size = 1) +
+  scale_fill_manual(values = c("olivedrab3","orange","turquoise4","blueviolet")) +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 90)) +
+  xlab("Site") +
+  ylab("Specific richness") +
+  annotate("text", x = 4.2, y = 35, label = "P-value Student T.test Specific richness : ") +
+  annotate("text", x = 8.5, y = 35, label = round(student_rich$p.value, 4))
+
+````
+
+Sur chaque site on a en 2021 plus de taxons observés qu'en 2018 (__Attention modifier si besoin quand tout saisi__). 
+Plusieurs hypothèses : 
++1) c'est un biais observateur, plus forte détection en 2021 pour différentes raisons (date et avancement de la végétation, temps passé sur la placette...) mais paraît peu probable d'une part car cette tendance est la même sur l'ensemble des sites et d'autre part car à priori ce biais s'exprimerait plus sur les abondances que sur la présence/absence ;
++2) il y a réellement une augmentaton de la diversité spécifique sur les plots en lien avec la végétalisation des dépôts alluviaux et des moraines ;
++3) mélange des deux. 
+
+"Specpool" permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). ici, sur 84 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. 
+
+```{r alpha diversity, echo = TRUE}
+
+## POUR 2018
+
+# barplot(specnumber(t_dat_18), las = 2) # species richness
+
+# A CREUSER (VEGAN)
+
+specpool(t_dat_18, smallsample = TRUE) # c'est pareil avec ou sans le small sample
+
+#estimateR(t_dat_18)
+
+accum18 <- specaccum(t_dat_18, method = "random")
+plot(accum18, random = FALSE, ci.type = "polygon", ci.col = "grey", col = "red")
+
+preston18 <- prestonfit(colSums(t_dat_18))
+plot(preston18)
+
+veiledspec(preston18)
+```
+
+
+```{r alpha diversity 21}
+
+#specpool(t_dat_21, smallsample = TRUE) # a activer quand tout saisi
+# et ajouter les autres lignes comme 2018
+
+```
+
+## 1.2 Distance inter-placettes - indice de Jaccard
+
+### 1.2.1 Indice de Jaccard
+
+L'indice de Jaccard est une mesure de similarité entre plusieurs habitats. Plus l'indice est elevé et plus les échantillons partagent un grand nombre de taxons.
+
+__A FAIRE : mesurer la distance de jaccard entre chaque site 2018 vs 2021.__
+
+
+```{r beta diversity 1, fig.show = "hide", echo = "true"}
+
+beta_18 <- vegdist(t_dat_18, binary = TRUE, method = "jaccard")
+beta_18
+mb18 <- mean(beta_18)
+
+# beta_21 <- vegdist(t_dat_21, binary = TRUE, method = "jaccard")
+# beta_21
+# mean(beta_21)
+
+```
+L'indice de Jaccard moyen entre tous les sites en 2018 est de `mb18`. 
+
+### 1.2.2 Regroupement hiérarchique sur les relevés de 2018
+
+```{r hclustering, results = "hide", fig.show = "hide"}
+# https://stats.stackexchange.com/questions/195446/choosing-the-right-linkage-method-for-hierarchical-clustering/217742#217742
+# https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481#195481
+# https://www.datanovia.com/en/lessons/agglomerative-hierarchical-clustering/
+
+t_dat_clus_18 <- hclust(beta_18, method = "complete")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+  xlab="T_sax community sample", sub="Complete joining cluster")
+
+t_dat_coph_18 <- cophenetic(t_dat_clus_18)
+cor(beta_18, t_dat_coph_18)
+#
+t_dat_clus_av_18 <- hclust(beta_18, method = "average")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_av_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="Average joining cluster")
+
+t_dat_coph_av_18 <- cophenetic(t_dat_clus_av_18)
+cor(beta_18, t_dat_coph_av_18) # average method is better
+#
+t_dat_clus_ward_18 <- hclust(beta_18, method = "ward.D")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_ward_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="Ward D joining cluster")
+
+t_dat_coph_ward_18 <- cophenetic(t_dat_clus_ward_18)
+cor(beta_18, t_dat_coph_ward_18) # moins bien 
+#
+t_dat_clus_ward_18 <- hclust(beta_18, method = "ward.D2")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_ward_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="Ward D2 joining cluster")
+
+t_dat_coph_ward_18 <- cophenetic(t_dat_clus_ward_18)
+cor(beta_18, t_dat_coph_ward_18) # comme complete
+#
+t_dat_clus_sing_18 <- hclust(beta_18, method = "single")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_sing_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="Single joining cluster")
+
+t_dat_coph_sing_18 <- cophenetic(t_dat_clus_sing_18)
+cor(beta_18, t_dat_coph_sing_18) # comme complete
+#
+t_dat_clus_med_18 <- hclust(beta_18, method = "median")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_med_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="WPGMC joining cluster")
+
+t_dat_coph_med_18 <- cophenetic(t_dat_clus_med_18)
+cor(beta_18, t_dat_coph_med_18) # nul
+#
+t_dat_clus_quit_18 <- hclust(beta_18, method = "mcquitty")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_quit_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="WPGMA joining cluster")
+
+t_dat_coph_quit_18 <- cophenetic(t_dat_clus_quit_18)
+cor(beta_18, t_dat_coph_quit_18) # pas mal ! comme average presque mais en + le plot a une meilleure t?te
+#
+t_dat_clus_cent_18 <- hclust(beta_18, method = "centroid")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_cent_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="UPGMC joining cluster")
+
+t_dat_coph_cent_18 <- cophenetic(t_dat_clus_cent_18)
+cor(beta_18, t_dat_coph_cent_18) # pourri
+
+```
+
+D'après l'analyse des "cor" pour chaque méthode, celle de McQuitty est la meilleure, on l'utilise donc pour la hierarchie finale. 
+
+```{r beta diversity 2, fig.show = "hide", echo = "true"}
+
+t_dat_clus_quit_18 <- hclust(beta_18, method = "mcquitty")
+par(mar=c(6,4,2,2))
+plot(t_dat_clus_quit_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+     xlab="T_sax community sample", sub="WPGMA joining cluster")
+
+t_dat_coph_quit_18 <- cophenetic(t_dat_clus_quit_18)
+cor(beta_18, t_dat_coph_quit_18)
+
+```
+
+
+```{r beta diversity 3, results = "hide", echo = "true"}
+
+fviz_dend(t_dat_clus_quit_18, k = 8, palette = "Paired", cex = 0.75, lwd = 1.5, 
+          color_labels_by_k = FALSE, ylab = "Beta values", 
+          main = "Jaccard Beta diversity - WPGMA joining cluster - 2018")
+
+```
+D'après les relevés de 2018, les placettes de la Bérarde (sauf Carrelet ripisylve) se distinguent des autres. Cette dernière est un peu différente car elle est située sur une terrasse alluviale très ancienne, largement végétalisée et se rapprochant d'une pelouse. Elle est d'ailleurs proche de la placette du bas de moraine de Vallouise. Surprenamment, la placette du torrent de l'Eychaude se rapproche des placettes de Maurienne. 
+__Attention :__ il faut rappeller que seules les espèces sont prises en comptes dans la comparaison, les recouvrements végétaux n'interviennent pas. 
+
+
+```{r beta diversity 4, results = "hide", echo = "true"}
+# https://rdrr.io/cran/goeveg/man/dimcheckMDS.html
+# avec deux dimensions on n'est pas trop mal meme si 3 seraient bien
+# https://jonlefcheck.net/2012/10/24/nmds-tutorial-in-r/
+
+dimcheckMDS(t_dat_18, distance = "jaccard", k = 6, trymax = 100, autotransform = FALSE) 
+NMDS_18 <- metaMDS(t_dat_18, distance = "jaccard", binary = TRUE, trymax = 100, k = 2) 
+NMDS_18 # on passe d'un stress de 0.11 avec 3 dimensions, a un stress de 0.18 avec deux dimensions
+
+stressplot(NMDS_18)
+
+```
+
+
+```{r beta diversity 5, results = "hide", fig.show = "hide"}
+
+secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),
+             "VALLOUISE","MAURIENNE","VALLOUISE")
+# secteurs
+ordiplot(NMDS_18, type = "n")
+orditorp(NMDS_18, display = "species", col = "black", air = 0.01, label = F)
+orditorp(NMDS_18, display = "sites",
+         col = c(rep("turquoise4",5), "orange", rep("olivedrab3",2), rep("orange",2), rep("blueviolet",2), "orange", "olivedrab3", "orange"),
+         air = 0.01, cex = 1.25)
+
+```
+
+
+```{r beta diversity 6, results = "hide", fig.show = "hide"}
+# clustering
+ordiplot(NMDS_18, type="n")
+ordicluster(NMDS_18, hclust(vegdist(t_dat_18, binary = TRUE, method = "jaccard"), method = "mcquitty"))
+orditorp(NMDS_18, display ="species",col = "black", air = 0.01, label = F)
+orditorp(NMDS_18, display = "sites",
+         col = c(rep("turquoise4",5), "orange", rep("olivedrab3",2), rep("orange",2), rep("blueviolet",2), "orange", "olivedrab3", "orange"),
+         air = 0.01, cex = 1.25)
+
+```
+
+
+```{r beta diversity plots, results = "hide", echo = "true"}
+
+# Extraction des données pour pouvoir utiliser ggplot
+
+data.scores_18 <- as.data.frame(scores(NMDS_18))  # Using the scores function from vegan to extract the site scores and convert to a data.frame
+data.scores_18$site <- rownames(data.scores_18)  # create a column of site names, from the rownames of data.scores
+head(data.scores_18)  # look at the data
+
+species.scores_18 <- as.data.frame(scores(NMDS_18, "species"))  # Using the scores function from vegan to extract the species scores and convert to a data.frame
+species.scores_18$species <- rownames(species.scores_18)  # create a column of species, from the rownames of species.scores
+head(species.scores_18)  # look at the data
+
+
+# display.brewer.pal(n = 9, "Paired")
+# brewer.pal(n = 9, "Paired")
+col_paired <- c("#A6CEE3","#FF7F00","#1F78B4","#B2DF8A","#1F78B4","#33A02C","#E31A1C","#E31A1C",
+                "#FB9A99","#FF7F00","#FDBF6F","#FDBF6F","#FB9A99","#E31A1C","#FB9A99")
+
+ggplot() + 
+    geom_point(data = data.scores_18, aes(x=NMDS1, y=NMDS2), size = 4, shape = 17, col = col_paired) + 
+    geom_label_repel(data = data.scores_18, aes(x=NMDS1, y=NMDS2,label=site), size= 4, vjust=0) +
+    geom_point(data = species.scores_18, aes(x=NMDS1, y=NMDS2), color = "black", size = 2)
+  
+```  
+
+## 1.3 Indice de Sorensen
+
+```{r sorensen 1, echo = "true"}
+
+d_18 <- betadiver(t_dat_18, "w") ## This should be equal to Sorensen index (binary Bray-Curtis in vegan)
+d_21 <- betadiver(t_dat_21, "w") ## This should be equal to Sorensen index (binary Bray-Curtis in vegan)
+d_18
+d_21
+
+# voir :
+## https://sites.google.com/site/mb3gustame/hypothesis-tests/the-mantel-test
+## https://mb3is.megx.net/gustame/dissimilarity-based-methods/nmds
+
+```
+
+
+## 1.4 Comparaison de la diversité alpha globale des deux années 
+
+```{r comp alpha, results = "hide"}
+# ?
+x <- rowSums(dat_18)
+taxons_18 <- as.data.frame(rownames(dat_18))
+taxons_18$somme <- x
+
+supp_18 <- which(taxons_18$somme == 0)
+taxons_18 <- taxons_18[-supp_18,]
+tax_18 <- taxons_18[,1]
+
+y <- rowSums(dat_21)
+taxons_21 <- as.data.frame(rownames(dat_21))
+taxons_21$somme <- y
+
+supp_21 <- which(taxons_21$somme == 0)
+taxons_21 <- taxons_21[-supp_21,]
+tax_21 <- taxons_21[,1]
+#
+```
+
+
+```{r comp alpha 2, results = "hide"}
+# création de vecteurs contenant la liste des espèces pour chaque site et chaque année
+
+dat_18_tax <- dat_18[,-16]
+
+
+for (j in 1:ncol(dat_18_tax)){
+  for (i in 1:nrow(dat_18_tax)){
+    
+  if (dat_18_tax[i,j] > 0) 
+    dat_18_tax[i,j] <- rownames(dat_18_tax[i,])
+  
+  else NULL
+  
+}}
+dat_18_tax[dat_18_tax == 0] <- NA
+
+
+
+dat_21_tax <- dat_21[,c(6,9,10,13,15)] # conserver toutes les lignes une fois tout saisi
+
+
+for (j in 1:ncol(dat_21_tax)){
+  for (i in 1:nrow(dat_21_tax)){
+    
+    if (dat_21_tax[i,j] > 0) 
+      dat_21_tax[i,j] <- rownames(dat_21_tax[i,])
+
+    else NULL
+    
+}}
+dat_21_tax[dat_21_tax == 0] <- NA
+
+
+
+
+
+chr_list_18 = list()
+
+for (j in 1:ncol(dat_18_tax)) {
+  
+  chr_18 <- na.omit(dat_18_tax[,j])
+  chr_list_18[[j]] = chr_18
+  }
+
+names(chr_list_18) <- paste(colnames(dat_18_tax),"_18", sep='')
+
+
+
+chr_list_21 = list()
+
+for (j in 1:ncol(dat_21_tax)) {
+  
+  chr_21 <- na.omit(dat_21_tax[,j])
+  chr_list_21[[j]] = chr_21
+  
+}
+
+names(chr_list_21) <- paste(colnames(dat_21_tax),"_21", sep='')
+
+```
+
+
+```{r comp alpha 3, results = "hide"}
+# exemple de comparaison de données
+intersect(chr_list_21$EYCH_meleze_21, chr_list_18$EYCH_meleze_18)
+
+a1 <- setdiff(chr_list_21$EYCH_meleze_21, chr_list_18$EYCH_meleze_18) # elements dans 21 mais pas dans 18
+a2 <- setdiff(chr_list_18$EYCH_meleze_18, chr_list_21$EYCH_meleze_21)
+
+# De nombreuses espèces supplémentaires en 21 mais on est sur une placette très grande donc il y a 
+#probabalement de la sous-observation en 18. 
+
+```
+
+
+```{r a refaire, results = "hide", eval = FALSE}
+
+############# A (RE)FAIRE ET COMPLETER ################
+
+
+# faire une boucle pour les setdiff et les length une fois tout saisi
+
+
+j <- 16
+setdiff_list_21no18 = list()
+setdiff_list_18no21 = list()
+  
+  for i in 1:length(chr_list_tot) {
+    a1 <- setdiff(chr_list_tot[[i]], chr_list_tot[[j]]) # dans 21 mais pas dans 18
+    a2 <- setdiff(chr_list_tot[[j]], chr_list_tot[[i]]) # dans 18 mais pas dans 21
+    
+    setdiff_list_21no18[[i]] = length(a1)
+    setdiff_list_18no21[[i]] = length(a2)
+    
+    j <- j + 15
+    
+  }
+
+
+tab_setdiff <- as.data.frame(colnames(dat_18_tax))
+tab_setdiff$p21no18 <- setdiff_list_21no18
+tab_setdiff$p18no21 <- setdiff_list_18no21
+
+
+
+
+# création des venn diagram
+
+library(ggvenn)
+library(ggVennDiagram)
+chr_list_tot <- c(chr_list_21, chr_list_18)
+
+ggvenn(chr_list_tot, c("EYCH_meleze_21", "EYCH_meleze_18", "EYCH_torr_tot_21", "EYCH_torr_tot_18"))
+ggVennDiagram(chr_list_tot[c(1,4,11,18)])
+ggVennDiagram(chr_list_tot[c(1,11)]) # faire une boucle une fois tous les 21 saisis
+ggVennDiagram(chr_list_tot[c(2,14)])
+ggVennDiagram(chr_list_tot[c(3,15)])
+ggVennDiagram(chr_list_tot[c(4,18)])
+ggVennDiagram(chr_list_tot[c(5,20)])
+
+### provisoire, ce sont les setdiff observés sur les venn diagrams
+prov_frame <- as.data.frame(rep(0,5))
+prov_frame$pres21no18 <- c(4,16,6,10,10)
+prov_frame$pres18no21 <- c(2,4,5,2,6)
+prov_frame$common <- c(14,12,4,7,10)
+prov_frame$site <- colnames(dat_21_tax)
+rownames(prov_frame) <- as.character(colnames(dat_21_tax))
+prov_frame <- prov_frame[,-1]
+
+prov_long <- pivot_longer(prov_frame, cols = -site, names_to = "type",
+values_to = "nombre", values_drop_na = TRUE) 
+
+ggplot(prov_long, aes(x = type, y = nombre, fill = site)) +
+  geom_bar(stat = "identity")
+
+# On a beaucoup plus de taxons présents en 21 et pas en 18
+# Tous les sites ont des taxons présents en 21 et pas en 18 ET des taxons présents en 18 et pas en 21. 
+# a voir si ça se confirme une fois tous les sites saisis
+
+
+# automatiser la création de tous les diagrammes 
+# voir si intérêt de faire des venn en regroupant les sites proches botaniquement (voir ACP ?)
+# sauver sur GitHub
+# repérer les nouveaux taxons avec un NMDS ou une type ACP
+# passer le tout en RMD
+
+```
+

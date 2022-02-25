@@ -37,7 +37,7 @@ Protocole : relevés botaniques avec abondance exprimée en % absolu (non dégra
 Les listes d'espèces sont dégradées en présence/absence. 
 
 ```{r mise en forme 1, results = "hide"}
-dat<-read.table("data_bota_prabs.csv", header=T, sep=";", dec=".")
+dat <- read.table("data_bota_prabs.csv", header=T, sep=";", dec=".")
 
 summary(dat)
 str(dat)

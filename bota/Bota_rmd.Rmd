@@ -9,6 +9,18 @@ output:
     toc_depth: '4'
 ---
 
+```{css, echo=FALSE}
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 300px;
+}
+```
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
@@ -37,30 +49,32 @@ Protocole : relevés botaniques avec abondance exprimée en % absolu (non dégra
 Les listes d'espèces sont dégradées en présence/absence. 
 
 ```{r mise en forme 1, results = "hide"}
-dat <- read.table("data_bota_prabs.csv", header=T, sep=";", dec=".")
 
-summary(dat)
-str(dat)
+dat_prabs <- read.table("data_bota_prabs.csv", header=T, sep=";", dec=".")
 
-dat<-dat[,c(-1, -22:-37)]
+
+summary(dat_prabs)
+str(dat_prabs)
+
+dat_prabs <- dat_prabs[,c(-1)]
 
 # il y a plusieurs sites qui sont splittes en deux
 # on cree des colonnes pour combiner les deux parties
 
 # Pour Eychauda torrent :
-dat$EYCH_torr_tot <- dat$EYCH_torr_EFG
+dat_prabs$EYCH_torr_tot <- dat_prabs$EYCH_torr_EFG
 
-for (i in 1:nrow(dat)){
+for (i in 1:nrow(dat_prabs)){
   
-  if (dat[i,9] == 1) 
-    dat[i,21] <- 1
+  if (dat_prabs[i,9] == 1) 
+    dat_prabs[i,21] <- 1
     else NULL
  
 }
 
 
 # Pour Maurienne planay torrent :
-dat$MAUR_torr_tot <- dat$MAUR_planay_torr_ABCD
+dat_prabs$MAUR_torr_tot <- dat_prabs$MAUR_planay_torr_ABCD
 
 # for (i in 1:nrow(dat)){
   
@@ -71,52 +85,55 @@ dat$MAUR_torr_tot <- dat$MAUR_planay_torr_ABCD
 # }
 
 # Pour Vallouise moraine haut :
-dat$VALL_mor_haut_tot <- dat$VALL_mor_haut_ABCD
+dat_prabs$VALL_mor_haut_tot <- dat_prabs$VALL_mor_haut_ABCD
 
-for (i in 1:nrow(dat)){
+for (i in 1:nrow(dat_prabs)){
   
-  if (dat[i,17] == 1) 
-    dat[i,23] <- 1
+  if (dat_prabs[i,17] == 1) 
+    dat_prabs[i,23] <- 1
   else NULL
   
 }
 
 
-dat <- dat[,c(-9,-10,-13,-14,-17,-18)] # On enl?ve les colonnes qui ne servent plus
+dat_prabs <- dat_prabs[,c(-9,-10,-13,-14,-17,-18)] # On enleve les colonnes qui ne servent plus
 
 # Creation des data frames par annee
 
-dat_18 <- dat[c(18:122),]
-dat_21 <- dat[c(123:244),]
+d18 <- which(dat_prabs$year == "2018")
+dat_prabs_18 <- dat_prabs[d18,]
 
-rownames(dat_18) <- dat_18$species
-dat_18 <- dat_18[,c(-1,-2)]
+d21 <- which(dat_prabs$year == "2021")
+dat_prabs_21 <- dat_prabs[d21,]
+
+rownames(dat_prabs_18) <- dat_prabs_18$species
+dat_prabs_18 <- dat_prabs_18[,c(-1,-2)]
 
 
-rownames(dat_21) <- dat_21$species
-dat_21 <- dat_21[,c(-1,-2)]
+rownames(dat_prabs_21) <- dat_prabs_21$species
+dat_prabs_21 <- dat_prabs_21[,c(-1,-2)]
 
-````
+```
 
 
 
 ```{r specific diversity}
 
 # on transpose le data frame
-t_dat_18 <- as.data.frame(t(dat_18))
-t_dat_21 <- as.data.frame(t(dat_21))
+t_dat_prabs_18 <- as.data.frame(t(dat_prabs_18))
+t_dat_prabs_21 <- as.data.frame(t(dat_prabs_21))
 
 x <- c("BER_carr","BER_cari","BER_clap","BER_lac1","BER_lac2",
        "VAL_eyme","MAU_arpo","MAU_plah","VAL_glab","VAL_moba",
        "VIL_bas","VIL_haut","VAL_eyto","MAU_plto","VAL_moha")
 
-rownames(t_dat_18) <- x
-rownames(t_dat_21) <- x
+rownames(t_dat_prabs_18) <- x
+rownames(t_dat_prabs_21) <- x
 
 
-rich_18 <- rowSums(t_dat_18)
-site_18 <- rownames(t_dat_18)
-rich_21 <- rowSums(t_dat_21)
+rich_18 <- rowSums(t_dat_prabs_18)
+site_18 <- rownames(t_dat_prabs_18)
+rich_21 <- rowSums(t_dat_prabs_21)
 
 
 richness <- data.frame(site_18, rich_18, rich_21)
@@ -157,18 +174,18 @@ Plusieurs hypothèses :
 
 ## POUR 2018
 
-# barplot(specnumber(t_dat_18), las = 2) # species richness
+# barplot(specnumber(t_dat_prabs_18), las = 2) # species richness
 
 # A CREUSER (VEGAN)
 
-specpool(t_dat_18, smallsample = TRUE) # c'est pareil avec ou sans le small sample
+specpool(t_dat_prabs_18, smallsample = TRUE) # c'est pareil avec ou sans le small sample
 
-#estimateR(t_dat_18)
+#estimateR(t_dat_prabs_18)
 
-accum18 <- specaccum(t_dat_18, method = "random")
+accum18 <- specaccum(t_dat_prabs_18, method = "random")
 plot(accum18, random = FALSE, ci.type = "polygon", ci.col = "grey", col = "red")
 
-preston18 <- prestonfit(colSums(t_dat_18))
+preston18 <- prestonfit(colSums(t_dat_prabs_18))
 plot(preston18)
 
 veiledspec(preston18)
@@ -177,7 +194,7 @@ veiledspec(preston18)
 
 ```{r alpha diversity 21}
 
-#specpool(t_dat_21, smallsample = TRUE) # a activer quand tout saisi
+#specpool(t_dat_prabs_21, smallsample = TRUE) # a activer quand tout saisi
 # et ajouter les autres lignes comme 2018
 
 ```
@@ -193,11 +210,11 @@ __A FAIRE : mesurer la distance de jaccard entre chaque site 2018 vs 2021.__
 
 ```{r beta diversity 1, fig.show = "hide", echo = "true"}
 
-beta_18 <- vegdist(t_dat_18, binary = TRUE, method = "jaccard")
+beta_18 <- vegdist(t_dat_prabs_18, binary = TRUE, method = "jaccard")
 beta_18
 mb18 <- mean(beta_18)
 
-# beta_21 <- vegdist(t_dat_21, binary = TRUE, method = "jaccard")
+# beta_21 <- vegdist(t_dat_prabs_21, binary = TRUE, method = "jaccard")
 # beta_21
 # mean(beta_21)
 
@@ -211,69 +228,69 @@ L'indice de Jaccard moyen entre tous les sites en 2018 est de `mb18`.
 # https://stats.stackexchange.com/questions/195456/how-to-select-a-clustering-method-how-to-validate-a-cluster-solution-to-warran/195481#195481
 # https://www.datanovia.com/en/lessons/agglomerative-hierarchical-clustering/
 
-t_dat_clus_18 <- hclust(beta_18, method = "complete")
+t_dat_prabs_clus_18 <- hclust(beta_18, method = "complete")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
   xlab="T_sax community sample", sub="Complete joining cluster")
 
-t_dat_coph_18 <- cophenetic(t_dat_clus_18)
-cor(beta_18, t_dat_coph_18)
+t_dat_prabs_coph_18 <- cophenetic(t_dat_prabs_clus_18)
+cor(beta_18, t_dat_prabs_coph_18)
 #
-t_dat_clus_av_18 <- hclust(beta_18, method = "average")
+t_dat_prabs_clus_av_18 <- hclust(beta_18, method = "average")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_av_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_av_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="Average joining cluster")
 
-t_dat_coph_av_18 <- cophenetic(t_dat_clus_av_18)
-cor(beta_18, t_dat_coph_av_18) # average method is better
+t_dat_prabs_coph_av_18 <- cophenetic(t_dat_prabs_clus_av_18)
+cor(beta_18, t_dat_prabs_coph_av_18) # average method is better
 #
-t_dat_clus_ward_18 <- hclust(beta_18, method = "ward.D")
+t_dat_prabs_clus_ward_18 <- hclust(beta_18, method = "ward.D")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_ward_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_ward_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="Ward D joining cluster")
 
-t_dat_coph_ward_18 <- cophenetic(t_dat_clus_ward_18)
-cor(beta_18, t_dat_coph_ward_18) # moins bien 
+t_dat_prabs_coph_ward_18 <- cophenetic(t_dat_prabs_clus_ward_18)
+cor(beta_18, t_dat_prabs_coph_ward_18) # moins bien 
 #
-t_dat_clus_ward_18 <- hclust(beta_18, method = "ward.D2")
+t_dat_prabs_clus_ward_18 <- hclust(beta_18, method = "ward.D2")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_ward_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_ward_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="Ward D2 joining cluster")
 
-t_dat_coph_ward_18 <- cophenetic(t_dat_clus_ward_18)
-cor(beta_18, t_dat_coph_ward_18) # comme complete
+t_dat_prabs_coph_ward_18 <- cophenetic(t_dat_prabs_clus_ward_18)
+cor(beta_18, t_dat_prabs_coph_ward_18) # comme complete
 #
-t_dat_clus_sing_18 <- hclust(beta_18, method = "single")
+t_dat_prabs_clus_sing_18 <- hclust(beta_18, method = "single")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_sing_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_sing_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="Single joining cluster")
 
-t_dat_coph_sing_18 <- cophenetic(t_dat_clus_sing_18)
-cor(beta_18, t_dat_coph_sing_18) # comme complete
+t_dat_prabs_coph_sing_18 <- cophenetic(t_dat_prabs_clus_sing_18)
+cor(beta_18, t_dat_prabs_coph_sing_18) # comme complete
 #
-t_dat_clus_med_18 <- hclust(beta_18, method = "median")
+t_dat_prabs_clus_med_18 <- hclust(beta_18, method = "median")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_med_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_med_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="WPGMC joining cluster")
 
-t_dat_coph_med_18 <- cophenetic(t_dat_clus_med_18)
-cor(beta_18, t_dat_coph_med_18) # nul
+t_dat_prabs_coph_med_18 <- cophenetic(t_dat_prabs_clus_med_18)
+cor(beta_18, t_dat_prabs_coph_med_18) # nul
 #
-t_dat_clus_quit_18 <- hclust(beta_18, method = "mcquitty")
+t_dat_prabs_clus_quit_18 <- hclust(beta_18, method = "mcquitty")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_quit_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_quit_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="WPGMA joining cluster")
 
-t_dat_coph_quit_18 <- cophenetic(t_dat_clus_quit_18)
-cor(beta_18, t_dat_coph_quit_18) # pas mal ! comme average presque mais en + le plot a une meilleure t?te
+t_dat_prabs_coph_quit_18 <- cophenetic(t_dat_prabs_clus_quit_18)
+cor(beta_18, t_dat_prabs_coph_quit_18) # pas mal ! comme average presque mais en + le plot a une meilleure t?te
 #
-t_dat_clus_cent_18 <- hclust(beta_18, method = "centroid")
+t_dat_prabs_clus_cent_18 <- hclust(beta_18, method = "centroid")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_cent_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_cent_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="UPGMC joining cluster")
 
-t_dat_coph_cent_18 <- cophenetic(t_dat_clus_cent_18)
-cor(beta_18, t_dat_coph_cent_18) # pourri
+t_dat_prabs_coph_cent_18 <- cophenetic(t_dat_prabs_clus_cent_18)
+cor(beta_18, t_dat_prabs_coph_cent_18) # pourri
 
 ```
 
@@ -281,20 +298,20 @@ D'après l'analyse des "cor" pour chaque méthode, celle de McQuitty est la meil
 
 ```{r beta diversity 2, fig.show = "hide", echo = "true"}
 
-t_dat_clus_quit_18 <- hclust(beta_18, method = "mcquitty")
+t_dat_prabs_clus_quit_18 <- hclust(beta_18, method = "mcquitty")
 par(mar=c(6,4,2,2))
-plot(t_dat_clus_quit_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
+plot(t_dat_prabs_clus_quit_18, hang = -1, main="Jaccard Beta diversity ", ylab="Beta values", 
      xlab="T_sax community sample", sub="WPGMA joining cluster")
 
-t_dat_coph_quit_18 <- cophenetic(t_dat_clus_quit_18)
-cor(beta_18, t_dat_coph_quit_18)
+t_dat_prabs_coph_quit_18 <- cophenetic(t_dat_prabs_clus_quit_18)
+cor(beta_18, t_dat_prabs_coph_quit_18)
 
 ```
 
 
 ```{r beta diversity 3, results = "hide", echo = "true"}
 
-fviz_dend(t_dat_clus_quit_18, k = 8, palette = "Paired", cex = 0.75, lwd = 1.5, 
+fviz_dend(t_dat_prabs_clus_quit_18, k = 8, palette = "Paired", cex = 0.75, lwd = 1.5, 
           color_labels_by_k = FALSE, ylab = "Beta values", 
           main = "Jaccard Beta diversity - WPGMA joining cluster - 2018")
 
@@ -308,8 +325,8 @@ __Attention :__ il faut rappeller que seules les espèces sont prises en comptes
 # avec deux dimensions on n'est pas trop mal meme si 3 seraient bien
 # https://jonlefcheck.net/2012/10/24/nmds-tutorial-in-r/
 
-dimcheckMDS(t_dat_18, distance = "jaccard", k = 6, trymax = 100, autotransform = FALSE) 
-NMDS_18 <- metaMDS(t_dat_18, distance = "jaccard", binary = TRUE, trymax = 100, k = 2) 
+dimcheckMDS(t_dat_prabs_18, distance = "jaccard", k = 6, trymax = 100, autotransform = FALSE) 
+NMDS_18 <- metaMDS(t_dat_prabs_18, distance = "jaccard", binary = TRUE, trymax = 100, k = 2) 
 NMDS_18 # on passe d'un stress de 0.11 avec 3 dimensions, a un stress de 0.18 avec deux dimensions
 
 stressplot(NMDS_18)
@@ -334,7 +351,7 @@ orditorp(NMDS_18, display = "sites",
 ```{r beta diversity 6, results = "hide", fig.show = "hide"}
 # clustering
 ordiplot(NMDS_18, type="n")
-ordicluster(NMDS_18, hclust(vegdist(t_dat_18, binary = TRUE, method = "jaccard"), method = "mcquitty"))
+ordicluster(NMDS_18, hclust(vegdist(t_dat_prabs_18, binary = TRUE, method = "jaccard"), method = "mcquitty"))
 orditorp(NMDS_18, display ="species",col = "black", air = 0.01, label = F)
 orditorp(NMDS_18, display = "sites",
          col = c(rep("turquoise4",5), "orange", rep("olivedrab3",2), rep("orange",2), rep("blueviolet",2), "orange", "olivedrab3", "orange"),
@@ -372,8 +389,8 @@ ggplot() +
 
 ```{r sorensen 1, echo = "true"}
 
-d_18 <- betadiver(t_dat_18, "w") ## This should be equal to Sorensen index (binary Bray-Curtis in vegan)
-d_21 <- betadiver(t_dat_21, "w") ## This should be equal to Sorensen index (binary Bray-Curtis in vegan)
+d_18 <- betadiver(t_dat_prabs_18, "w") ## This should be equal to Sorensen index (binary Bray-Curtis in vegan)
+d_21 <- betadiver(t_dat_prabs_21, "w") ## This should be equal to Sorensen index (binary Bray-Curtis in vegan)
 d_18
 d_21
 
@@ -388,16 +405,16 @@ d_21
 
 ```{r comp alpha, results = "hide"}
 # ?
-x <- rowSums(dat_18)
-taxons_18 <- as.data.frame(rownames(dat_18))
+x <- rowSums(dat_prabs_18)
+taxons_18 <- as.data.frame(rownames(dat_prabs_18))
 taxons_18$somme <- x
 
 supp_18 <- which(taxons_18$somme == 0)
 taxons_18 <- taxons_18[-supp_18,]
 tax_18 <- taxons_18[,1]
 
-y <- rowSums(dat_21)
-taxons_21 <- as.data.frame(rownames(dat_21))
+y <- rowSums(dat_prabs_21)
+taxons_21 <- as.data.frame(rownames(dat_prabs_21))
 taxons_21$somme <- y
 
 supp_21 <- which(taxons_21$somme == 0)
@@ -410,35 +427,35 @@ tax_21 <- taxons_21[,1]
 ```{r comp alpha 2, results = "hide"}
 # création de vecteurs contenant la liste des espèces pour chaque site et chaque année
 
-dat_18_tax <- dat_18[,-16]
+dat_prabs_18_tax <- dat_prabs_18[,-16]
 
 
-for (j in 1:ncol(dat_18_tax)){
-  for (i in 1:nrow(dat_18_tax)){
+for (j in 1:ncol(dat_prabs_18_tax)){
+  for (i in 1:nrow(dat_prabs_18_tax)){
     
-  if (dat_18_tax[i,j] > 0) 
-    dat_18_tax[i,j] <- rownames(dat_18_tax[i,])
+  if (dat_prabs_18_tax[i,j] > 0) 
+    dat_prabs_18_tax[i,j] <- rownames(dat_prabs_18_tax[i,])
   
   else NULL
   
 }}
-dat_18_tax[dat_18_tax == 0] <- NA
+dat_prabs_18_tax[dat_prabs_18_tax == 0] <- NA
 
 
 
-dat_21_tax <- dat_21[,c(6,9,10,13,15)] # conserver toutes les lignes une fois tout saisi
+dat_prabs_21_tax <- dat_prabs_21[,c(6,9,10,13,15)] # conserver toutes les lignes une fois tout saisi
 
 
-for (j in 1:ncol(dat_21_tax)){
-  for (i in 1:nrow(dat_21_tax)){
+for (j in 1:ncol(dat_prabs_21_tax)){
+  for (i in 1:nrow(dat_prabs_21_tax)){
     
-    if (dat_21_tax[i,j] > 0) 
-      dat_21_tax[i,j] <- rownames(dat_21_tax[i,])
+    if (dat_prabs_21_tax[i,j] > 0) 
+      dat_prabs_21_tax[i,j] <- rownames(dat_prabs_21_tax[i,])
 
     else NULL
     
 }}
-dat_21_tax[dat_21_tax == 0] <- NA
+dat_prabs_21_tax[dat_prabs_21_tax == 0] <- NA
 
 
 
@@ -446,26 +463,26 @@ dat_21_tax[dat_21_tax == 0] <- NA
 
 chr_list_18 = list()
 
-for (j in 1:ncol(dat_18_tax)) {
+for (j in 1:ncol(dat_prabs_18_tax)) {
   
-  chr_18 <- na.omit(dat_18_tax[,j])
+  chr_18 <- na.omit(dat_prabs_18_tax[,j])
   chr_list_18[[j]] = chr_18
   }
 
-names(chr_list_18) <- paste(colnames(dat_18_tax),"_18", sep='')
+names(chr_list_18) <- paste(colnames(dat_prabs_18_tax),"_18", sep='')
 
 
 
 chr_list_21 = list()
 
-for (j in 1:ncol(dat_21_tax)) {
+for (j in 1:ncol(dat_prabs_21_tax)) {
   
-  chr_21 <- na.omit(dat_21_tax[,j])
+  chr_21 <- na.omit(dat_prabs_21_tax[,j])
   chr_list_21[[j]] = chr_21
   
 }
 
-names(chr_list_21) <- paste(colnames(dat_21_tax),"_21", sep='')
+names(chr_list_21) <- paste(colnames(dat_prabs_21_tax),"_21", sep='')
 
 ```
 
@@ -481,6 +498,18 @@ a2 <- setdiff(chr_list_18$EYCH_meleze_18, chr_list_21$EYCH_meleze_21)
 #probabalement de la sous-observation en 18. 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ```{r a refaire, results = "hide", eval = FALSE}
@@ -507,7 +536,7 @@ setdiff_list_18no21 = list()
   }
 
 
-tab_setdiff <- as.data.frame(colnames(dat_18_tax))
+tab_setdiff <- as.data.frame(colnames(dat_prabs_18_tax))
 tab_setdiff$p21no18 <- setdiff_list_21no18
 tab_setdiff$p18no21 <- setdiff_list_18no21
 
@@ -533,8 +562,8 @@ prov_frame <- as.data.frame(rep(0,5))
 prov_frame$pres21no18 <- c(4,16,6,10,10)
 prov_frame$pres18no21 <- c(2,4,5,2,6)
 prov_frame$common <- c(14,12,4,7,10)
-prov_frame$site <- colnames(dat_21_tax)
-rownames(prov_frame) <- as.character(colnames(dat_21_tax))
+prov_frame$site <- colnames(dat_prabs_21_tax)
+rownames(prov_frame) <- as.character(colnames(dat_prabs_21_tax))
 prov_frame <- prov_frame[,-1]
 
 prov_long <- pivot_longer(prov_frame, cols = -site, names_to = "type",
@@ -556,3 +585,459 @@ ggplot(prov_long, aes(x = type, y = nombre, fill = site)) +
 
 ```
 
+# A faire : analyses avec l'abondance -> NMDS et trajectoires comme Renaud (Juncus squarrosus)
+# ATTENTION c'est de vrac copié ds analyses Juncus !
+
+```{r pourc, results = "hide", eval = FALSE}
+
+dat_pourc <- read.table("data_bota_pourc.csv", header=T, sep=";", dec=".")
+dat_pourc[dat_pourc=="+"] <- 0.1 # remplacement du + BB pour faire le BBtransf
+dat_pourc[dat_pourc==""] <- 0 # remplacement du + BB pour faire le BBtransf
+
+
+d18 <- which(dat_pourc$year == "2018")
+dat_pourc_18 <- dat_pourc[d18,]
+
+d21 <- which(dat_pourc$year == "2021")
+dat_pourc_21 <- dat_pourc[d21,]
+
+
+
+dat_pourc_18 <- t(dat_pourc_18[,-2])
+colnames(dat_pourc_18) <- dat_pourc_18[1,]
+dat_pourc_18 <- dat_pourc_18[-1,]
+dat_pourc_18 <- as.data.frame(dat_pourc_18)
+
+dat_pourc_21 <- t(dat_pourc_21[,-2])
+colnames(dat_pourc_21) <- dat_pourc_21[1,]
+dat_pourc_21 <- dat_pourc_21[-1,]
+dat_pourc_21 <- as.data.frame(dat_pourc_21)
+
+```
+
+### NMDS abondance
+
+La NMDS est une méthode de représentation permettant de traduire les relations de X relevés en X dimensions en une représentation 2 (ou plus) D en se basant sur les distances de Bray-Curtis. 
+On peut la faire en présence/absence, ou en abondance (comme ici). Pour ça, il suffit de changer l'argument `binary = TRUE` en `binary = FALSE`. 
+
+
+``` {r NMDS sp ab 2018, echo = TRUE, results = "hide", fig.show = "hide"}
+
+## 2018
+nmds_2018_pour <- as.data.frame(dat_pourc_18[(-3),]) # on enlève la colonne pleine de NA
+
+nmds_2018_pour <- nmds_2018_pour[,c(1:137)] %>%
+map_dfr(as.numeric)
+
+nmds_2018_pour <- as.matrix(nmds_2018_pour)
+
+set.seed(123)
+nmds_tot_2018_pour <- metaMDS(nmds_2018_pour, trymax = 100, distance = "bray", binary = FALSE) # Il faut faire qqchose avec les NA si on veut la NMDS en abondance
+
+# Il doit falloir transposer la matrice pour avoir les sites en colonnes
+               
+nmds_tot_2018_pour
+stressplot(nmds_tot_2018_pour)
+plot(nmds_tot_2018_pour)
+
+data.scores_2018_pour <- as.data.frame(scores(nmds_tot_2018_pour))
+
+data.scores_2018_pour$Lieu <- nmds_1_2018_pour$Lieu
+
+
+species.scores_2018_pour <- as.data.frame(scores(nmds_tot_2018_pour, "species"))
+species.scores_2018_pour$species <- rownames(species.scores_2018_pour)  
+head(species.scores_2018_pour)
+
+
+Pacons_pour <- data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Pacons", ][chull(data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
+
+Montauds_pour <- data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Montauds", ][chull(data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
+
+Narces_pour <- data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Narces", ][chull(data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2018_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)  
+hull.data_2018_pour
+```
+
+``` {r NMDS sp ab 2018 pac, echo = FALSE, results = "hide", fig.show = "hide"}
+
+## Sans Pacons 
+
+nmds_1_2018_pour_pac <- as.data.frame(dat_pourc[c(1,2,4:7),-42])
+nmds_2018_pour_pac <- nmds_1_2018_pour_pac[,c(-1:-3)]
+
+nmds_2018_pour_pac <- nmds_2018_pour_pac[,c(1:38)] %>%
+map_dfr(as.numeric)
+
+nmds_2018_pour_pac <- as.matrix(nmds_2018_pour_pac)
+
+set.seed(123)
+nmds_tot_2018_pour_pac <- metaMDS(nmds_2018_pour_pac, trymax = 100, distance = "bray", binary = FALSE)
+               
+nmds_tot_2018_pour_pac
+stressplot(nmds_tot_2018_pour_pac)
+plot(nmds_tot_2018_pour_pac)
+
+data.scores_2018_pour_pac <- as.data.frame(scores(nmds_tot_2018_pour_pac))
+
+data.scores_2018_pour_pac$Lieu <- nmds_1_2018_pour_pac$Lieu
+
+
+species.scores_2018_pour_pac <- as.data.frame(scores(nmds_tot_2018_pour_pac, "species"))
+species.scores_2018_pour_pac$species <- rownames(species.scores_2018_pour_pac)  
+head(species.scores_2018_pour_pac)
+
+
+Pacons_pour_pac <- data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Pacons", ][chull(data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
+
+Montauds_pour_pac <- data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Montauds", ][chull(data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
+
+Narces_pour_pac <- data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Narces", ][chull(data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2018_pour_pac <- rbind(Pacons_pour_pac, Montauds_pour_pac, Narces_pour_pac)  
+hull.data_2018_pour_pac
+
+```
+
+
+``` {r NMDS plot ab 2018, echo = TRUE, results = "hide"}
+
+data.scores_2018_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
+
+ggplot() + 
+  geom_text_repel(data = species.scores_2018_pour, aes(x = NMDS1, y = NMDS2, label = species), 
+                  alpha = 0.5,  color = "grey70") +
+  geom_point(data = data.scores_2018_pour, aes(x = NMDS1, y = NMDS2, color = Lieu), 
+             size = 3.5, alpha = 0.5) +
+  geom_text_repel(data = data.scores_2018_pour,aes(x = NMDS1, y = NMDS2, color = Lieu, label = tiquet)) +
+  geom_point(data = species.scores_2018_pour, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
+             color = "grey70") +
+  coord_equal() +
+  theme_bw() +
+  scale_color_jcolors(palette = "pal7") +
+  theme(axis.text.x = element_blank(),  
+        axis.text.y = element_blank(), 
+        axis.ticks = element_blank(),  
+        axis.title.x = element_text(size = 18), 
+        axis.title.y = element_text(size = 18), 
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank(), 
+        plot.background = element_blank()) +
+  ggtitle(label = "NMDS 2018 (stress = 0.038)")
+
+```
+
+
+``` {r NMDS sp ab 2011, echo = FALSE, results = "hide", fig.show = "hide"}
+
+## 2011
+nmds_1_2011_pour <- as.data.frame(dat_pourc[c(15:21),-42])
+nmds_2011_pour <- nmds_1_2011_pour[,c(-1:-3)]
+
+nmds_2011_pour <- nmds_2011_pour[,c(1:38)] %>%
+map_dfr(as.numeric)
+
+nmds_2011_pour <- as.matrix(nmds_2011_pour)
+
+set.seed(123)
+nmds_tot_2011_pour <- metaMDS(nmds_2011_pour, trymax = 100, distance = "bray", binary = FALSE)
+               
+nmds_tot_2011_pour
+stressplot(nmds_tot_2011_pour)
+plot(nmds_tot_2011_pour)
+
+data.scores_2011_pour <- as.data.frame(scores(nmds_tot_2011_pour))
+
+data.scores_2011_pour$Lieu <- nmds_1_2011_pour$Lieu
+
+
+species.scores_2011_pour <- as.data.frame(scores(nmds_tot_2011_pour, "species"))
+species.scores_2011_pour$species <- rownames(species.scores_2011_pour)  
+head(species.scores_2011_pour)
+
+
+Pacons_pour <- data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Pacons", ][chull(data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
+
+Montauds_pour <- data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Montauds", ][chull(data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
+
+Narces_pour <- data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Narces", ][chull(data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2011_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)  
+hull.data_2011_pour
+
+```
+
+``` {r NMDS sp ab 2011 pac, echo = FALSE, results = "hide", fig.show = "hide"}
+
+# Sans Pacons 03
+nmds_1_2011_pour_pac <- as.data.frame(dat_pourc[c(15, 16, 18:21),-42])
+nmds_2011_pour_pac <- nmds_1_2011_pour_pac[,c(-1:-3)]
+
+nmds_2011_pour_pac <- nmds_2011_pour_pac[,c(1:38)] %>%
+map_dfr(as.numeric)
+
+nmds_2011_pour_pac <- as.matrix(nmds_2011_pour_pac)
+
+set.seed(123)
+nmds_tot_2011_pour_pac <- metaMDS(nmds_2011_pour_pac, trymax = 100, distance = "bray", binary = FALSE)
+               
+nmds_tot_2011_pour_pac
+stressplot(nmds_tot_2011_pour_pac)
+plot(nmds_tot_2011_pour_pac)
+
+data.scores_2011_pour_pac <- as.data.frame(scores(nmds_tot_2011_pour_pac))
+
+data.scores_2011_pour_pac$Lieu <- nmds_1_2011_pour_pac$Lieu
+
+
+species.scores_2011_pour_pac <- as.data.frame(scores(nmds_tot_2011_pour_pac, "species"))
+species.scores_2011_pour_pac$species <- rownames(species.scores_2011_pour_pac)  
+head(species.scores_2011_pour_pac)
+
+
+Pacons_pour_pac <- data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Pacons", ][chull(data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
+
+Montauds_pour_pac <- data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Montauds", ][chull(data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
+
+Narces_pour_pac <- data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Narces", ][chull(data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2011_pour_pac <- rbind(Pacons_pour_pac, Montauds_pour_pac, Narces_pour_pac)  
+hull.data_2011_pour_pac
+
+
+```
+
+
+``` {r NMDS plot ab 2011, echo = FALSE, results = "hide"}
+## 2011
+
+data.scores_2011_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
+
+ggplot() + 
+  geom_text_repel(data = species.scores_2011_pour, aes(x = NMDS1, y = NMDS2, label = species), 
+                  alpha = 0.5,  color = "grey70") +
+  geom_point(data = data.scores_2011_pour, aes(x = NMDS1, y = NMDS2, color = Lieu), 
+             size = 3.5, alpha = 0.5) +
+  geom_text_repel(data = data.scores_2011_pour, aes(x = NMDS1, y = NMDS2, color = Lieu, label = tiquet)) +
+  geom_point(data = species.scores_2011_pour, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
+             color = "grey70") +
+  coord_equal() +
+  theme_bw() +
+  scale_color_jcolors(palette = "pal7") +
+  theme(axis.text.x = element_blank(),  
+        axis.text.y = element_blank(), 
+        axis.ticks = element_blank(),  
+        axis.title.x = element_text(size = 18), 
+        axis.title.y = element_text(size = 18), 
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank(), 
+        plot.background = element_blank()) +
+  ggtitle(label = "NMDS 2011 (stress = 5.86 X 10-05)")
+        
+```
+
+
+``` {r NMDS sp ab 2021, echo = FALSE, results = "hide", fig.show = "hide"}
+
+## 2021
+
+nmds_1_2021_pour <- as.data.frame(dat_pourc[c(8:14),-42])
+nmds_2021_pour <- nmds_1_2021_pour[,c(-1:-3)]
+
+nmds_2021_pour <- nmds_2021_pour[,c(1:38)] %>%
+map_dfr(as.numeric)
+
+nmds_2021_pour <- as.matrix(nmds_2021_pour)
+
+set.seed(123)
+nmds_tot_2021_pour <- metaMDS(nmds_2021_pour, trymax = 100, distance = "bray", binary = FALSE)
+               
+nmds_tot_2021_pour
+stressplot(nmds_tot_2021_pour)
+plot(nmds_tot_2021_pour)
+
+data.scores_2021_pour <- as.data.frame(scores(nmds_tot_2021_pour))
+
+data.scores_2021_pour$Lieu <- nmds_1_2021_pour$Lieu
+
+
+species.scores_2021_pour <- as.data.frame(scores(nmds_tot_2021_pour, "species"))
+species.scores_2021_pour$species <- rownames(species.scores_2021_pour)  
+head(species.scores_2021_pour)
+
+
+Pacons_pour <- data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Pacons", ][chull(data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
+
+Montauds_pour <- data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Montauds", ][chull(data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
+
+Narces_pour <- data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Narces", ][chull(data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2021_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)  
+hull.data_2021_pour
+
+```
+
+``` {r NMDS sp ab 2021 pac, echo = FALSE, results = "hide", fig.show = "hide"}
+
+## Sans pacons 03
+
+nmds_1_2021_pour_pac <- as.data.frame(dat_pourc[c(8,9,11:14),-42]) # on enleve pacons 03
+nmds_2021_pour_pac <- nmds_1_2021_pour_pac[,c(-1:-3)]
+
+nmds_2021_pour_pac <- nmds_2021_pour_pac[,c(1:38)] %>%
+map_dfr(as.numeric)
+
+nmds_2021_pour_pac <- as.matrix(nmds_2021_pour_pac)
+
+set.seed(123)
+nmds_tot_2021_pour_pac <- metaMDS(nmds_2021_pour_pac, trymax = 100, distance = "bray", binary = FALSE)
+               
+nmds_tot_2021_pour_pac
+stressplot(nmds_tot_2021_pour_pac)
+plot(nmds_tot_2021_pour_pac)
+
+data.scores_2021_pour_pac <- as.data.frame(scores(nmds_tot_2021_pour_pac))
+
+data.scores_2021_pour_pac$Lieu <- nmds_1_2021_pour_pac$Lieu
+
+
+species.scores_2021_pour_pac <- as.data.frame(scores(nmds_tot_2021_pour_pac, "species"))
+species.scores_2021_pour_pac$species <- rownames(species.scores_2021_pour_pac)  
+head(species.scores_2021_pour_pac)
+
+
+Pacons_pour_pac <- data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Pacons", ][chull(data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
+
+Montauds_pour_pac <- data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Montauds", ][chull(data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
+
+Narces_pour_pac <- data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Narces", ][chull(data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2021_pour <- rbind(Pacons_pour_pac, Montauds_pour_pac, Narces_pour_pac)  
+hull.data_2021_pour
+```
+
+
+```{r NMDS plot ab 2021, echo = FALSE, results="hide"}
+
+## 2021
+
+data.scores_2021_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
+
+ggplot() + 
+  geom_text_repel(data = species.scores_2021_pour, aes(x = NMDS1, y = NMDS2, label = species), 
+                  alpha = 0.5,  color = "grey70") +
+  geom_point(data = data.scores_2021_pour, aes(x = NMDS1, y = NMDS2, color = Lieu), 
+             size = 3.5, alpha = 0.5) +
+  geom_text_repel(data = data.scores_2021_pour,aes(x = NMDS1, y = NMDS2, color = Lieu, label = tiquet)) +
+  geom_point(data = species.scores_2021_pour, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
+             color = "grey70") +
+  coord_equal() +
+  theme_bw() +
+  scale_color_jcolors(palette = "pal7") +
+  theme(axis.text.x = element_blank(),  
+        axis.text.y = element_blank(), 
+        axis.ticks = element_blank(),  
+        axis.title.x = element_text(size = 18), 
+        axis.title.y = element_text(size = 18), 
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank(), 
+        plot.background = element_blank()) +
+  ggtitle(label = "NMDS 2021 (stress = 8.34 X 10-05)")
+
+
+```
+
+
+On peut ensuite étudier la trajectoire de chaque relevé. Pour cela, on réalise une NMDS générale. Problème : si les stress des NMDS réalisées par années étaient très acceptables, le stress de la NMDS globale n'est pas fou : quasiment 0.2 ! 
+
+```{r NMDS multiDyn, echo = TRUE, results = "show", fig.show = "hide"}
+
+nmds_1_big <- as.data.frame(dat_pourc[,-42])
+nmds_1_big <- arrange(nmds_1_big, Annee)
+
+nmds_big <- nmds_1_big[,c(-1:-3)]
+
+nmds_big <- nmds_1_big[,c(1:38)] %>%
+map_dfr(as.numeric)
+
+nmds_big <- as.matrix(nmds_big)
+
+set.seed(123)
+nmds_big <- metaMDS(nmds_big, trymax = 100, distance = "bray", binary = FALSE)
+
+nmds_big
+
+Annee <- rep(c("2011","2018","2021"), each = 7)
+Quadrats <- rep(c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02"), 3)
+
+plot(nmds_big)
+
+MultiDyn(MultCOO = nmds_big$points, FACTime = factor(Annee), FACT2 = factor(Quadrats),
+         COL = c("#1d3554", "#DFE07C", "#7F8E39", "#42858C", "#E48F1B", "#570D32", "#E5C616", "#D33B44"), 
+         ARR = TRUE) # Merci Renaud !
+
+
+
+data.scores_big <- as.data.frame(scores(nmds_big))
+
+data.scores_big$Lieu <- nmds_1_big$Lieu
+
+species.scores_big <- as.data.frame(scores(nmds_big, "species"))
+species.scores_big$species <- rownames(species.scores_big)  
+head(species.scores_big)
+
+```
+
+
+```{r NMDS sp 2 plot big total, echo = FALSE, results="hide"}
+
+# Ajout des variables env
+str(relev_var)
+
+rownames(relev_var) <- paste(relev_var$Annee,"_",relev_var$Releve)
+relev_var_moins <- relev_var[,c(-1:-5, -14, -15)]
+
+str(relev_var_moins)
+
+data.envfit_1 <- envfit(nmds_big,relev_var_moins, na.rm = TRUE)
+data.envfit_1 
+
+# https://stackoverflow.com/questions/14711470/plotting-envfit-vectors-vegan-package-in-ggplot2
+data.envfit_1_df <- as.data.frame(data.envfit_1$vectors$arrows*sqrt(data.envfit_1$vectors$r))
+
+ggplot() + 
+  geom_text_repel(data = species.scores_big, aes(x = NMDS1, y = NMDS2, label = species), 
+                  alpha = 0.5,  color = "grey70") +
+  geom_point(data = data.scores_big, aes(x = NMDS1, y = NMDS2, color = Quadrats, pch = Annee), 
+             size = 3.5, alpha = 0.5) +
+  geom_point(data = species.scores_big, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
+             color = "grey70") +
+  coord_equal() +
+  theme_bw() + 
+  scale_color_jcolors(palette = "pal7") +
+  theme(axis.text.x = element_blank(),  
+        axis.text.y = element_blank(), 
+        axis.ticks = element_blank(),  
+        axis.title.x = element_text(size = 18), 
+        axis.title.y = element_text(size = 18), 
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  
+        panel.grid.minor = element_blank(), 
+        plot.background = element_blank()) +
+  geom_segment(data = data.envfit_1_df, aes(x=0, xend = NMDS1, y=0, yend = NMDS2), 
+               arrow = arrow(length = unit(0.25, "cm"))) +
+  geom_text_repel(data = data.envfit_1_df,aes(x = NMDS1,y = NMDS2, 
+                                        label = rownames(data.envfit_1_df)), size = 3.5)
+
+
+```

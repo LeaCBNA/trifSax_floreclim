@@ -55,7 +55,6 @@ dat_prabs <- read.table("data_bota_prabs.csv", header=T, sep=";", dec=".")
 
 summary(dat_prabs)
 str(dat_prabs)
-
 dat_prabs <- dat_prabs[,c(-1)]
 
 # il y a plusieurs sites qui sont splittes en deux
@@ -115,13 +114,14 @@ dat_prabs_21 <- dat_prabs_21[,c(-1,-2)]
 
 ```
 
-
-
 ```{r specific diversity}
 
 # on transpose le data frame
 t_dat_prabs_18 <- as.data.frame(t(dat_prabs_18))
 t_dat_prabs_21 <- as.data.frame(t(dat_prabs_21))
+
+t_dat_prabs <- as.data.frame(t(dat_prabs))
+
 
 x <- c("BER_carr","BER_cari","BER_clap","BER_lac1","BER_lac2",
        "VAL_eyme","MAU_arpo","MAU_plah","VAL_glab","VAL_moba",
@@ -129,6 +129,7 @@ x <- c("BER_carr","BER_cari","BER_clap","BER_lac1","BER_lac2",
 
 rownames(t_dat_prabs_18) <- x
 rownames(t_dat_prabs_21) <- x
+rownames(t_dat_prabs) <- x
 
 
 rich_18 <- rowSums(t_dat_prabs_18)
@@ -142,7 +143,6 @@ richness <- data.frame(site_18, rich_18, rich_21)
 richness$secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),
                          "VALLOUISE","MAURIENNE","VALLOUISE")
 richness$secteur <- as.factor(richness$secteur)
-str(richness)
 
 richness_long <- richness %>% pivot_longer(
   cols = paste0(c("rich_18", "rich_21")), names_to = "year",
@@ -160,15 +160,16 @@ ggplot(richness_long, aes(x = site_18, y = rich, fill = year)) +
   annotate("text", x = 4.2, y = 35, label = "P-value Student T.test Specific richness : ") +
   annotate("text", x = 8.5, y = 35, label = round(student_rich$p.value, 4))
 
-````
+```
 
-Sur chaque site on a en 2021 plus de taxons observés qu'en 2018 (__Attention modifier si besoin quand tout saisi__). 
-Plusieurs hypothèses : 
-+1) c'est un biais observateur, plus forte détection en 2021 pour différentes raisons (date et avancement de la végétation, temps passé sur la placette...) mais paraît peu probable d'une part car cette tendance est la même sur l'ensemble des sites et d'autre part car à priori ce biais s'exprimerait plus sur les abondances que sur la présence/absence ;
-+2) il y a réellement une augmentaton de la diversité spécifique sur les plots en lien avec la végétalisation des dépôts alluviaux et des moraines ;
-+3) mélange des deux. 
+Sur 12 des 14 sites on a en 2021 plus de taxons observés qu'en 2018. 
+Plusieurs hypothèses :    
++ c'est un biais observateur, plus forte détection en 2021 pour différentes raisons (date et avancement de la végétation, temps passé sur la placette...) mais paraît peu probable d'une part car cette tendance est la même sur l'ensemble des sites et d'autre part car à priori ce biais s'exprimerait plus sur les abondances que sur la présence/absence ;    
++ il y a réellement une augmentaton de la diversité spécifique sur les plots en lien avec la végétalisation des dépôts alluviaux et des moraines ;    
++ mélange des deux.
 
-"Specpool" permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). ici, sur 84 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. 
+
+`Specpool` permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). ici, sur 84 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. Ca reste à creuser et ce n'est peut-être pas si intéressant. 
 
 ```{r alpha diversity, echo = TRUE}
 
@@ -176,26 +177,20 @@ Plusieurs hypothèses :
 
 # barplot(specnumber(t_dat_prabs_18), las = 2) # species richness
 
-# A CREUSER (VEGAN)
-
 specpool(t_dat_prabs_18, smallsample = TRUE) # c'est pareil avec ou sans le small sample
 
 #estimateR(t_dat_prabs_18)
-
-accum18 <- specaccum(t_dat_prabs_18, method = "random")
-plot(accum18, random = FALSE, ci.type = "polygon", ci.col = "grey", col = "red")
-
-preston18 <- prestonfit(colSums(t_dat_prabs_18))
-plot(preston18)
-
-veiledspec(preston18)
+#accum18 <- specaccum(t_dat_prabs_18, method = "random")
+#plot(accum18, random = FALSE, ci.type = "polygon", ci.col = "grey", col = "red")
+#preston18 <- prestonfit(colSums(t_dat_prabs_18))
+#plot(preston18)
+#veiledspec(preston18)
 ```
 
 
-```{r alpha diversity 21}
+```{r alpha diversity 21, echo = TRUE}
 
-#specpool(t_dat_prabs_21, smallsample = TRUE) # a activer quand tout saisi
-# et ajouter les autres lignes comme 2018
+specpool(t_dat_prabs_21, smallsample = TRUE)
 
 ```
 
@@ -214,12 +209,25 @@ beta_18 <- vegdist(t_dat_prabs_18, binary = TRUE, method = "jaccard")
 beta_18
 mb18 <- mean(beta_18)
 
-# beta_21 <- vegdist(t_dat_prabs_21, binary = TRUE, method = "jaccard")
-# beta_21
-# mean(beta_21)
+beta_21 <- vegdist(t_dat_prabs_21, binary = TRUE, method = "jaccard")
+beta_21
+mb21 <- mean(beta_21)
+```
+L'indice de Jaccard moyen entre tous les sites en 2018 est de `mb18` et de `mb21`en 2021. 
+
+
+```{r beta diversity tot, fig.show = "hide", echo = "true"}
+
+beta_tot <- vegdist(t_dat_prabs[c(-2),], binary = TRUE, method = "jaccard") ### RESOUDRE LE PB
+beta_tot <- as.matrix(beta_tot)
+beta_tot
 
 ```
-L'indice de Jaccard moyen entre tous les sites en 2018 est de `mb18`. 
+
+
+
+
+
 
 ### 1.2.2 Regroupement hiérarchique sur les relevés de 2018
 
@@ -621,7 +629,7 @@ La NMDS est une méthode de représentation permettant de traduire les relations
 On peut la faire en présence/absence, ou en abondance (comme ici). Pour ça, il suffit de changer l'argument `binary = TRUE` en `binary = FALSE`. 
 
 
-``` {r NMDS sp ab 2018, echo = TRUE, results = "hide", fig.show = "hide"}
+``` {r NMDS sp ab 2018, echo = TRUE, results = "hide", fig.show = "hide", eval = FALSE}
 
 ## 2018
 nmds_2018_pour <- as.data.frame(dat_pourc_18[(-3),]) # on enlève la colonne pleine de NA
@@ -661,7 +669,7 @@ hull.data_2018_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)
 hull.data_2018_pour
 ```
 
-``` {r NMDS sp ab 2018 pac, echo = FALSE, results = "hide", fig.show = "hide"}
+``` {r NMDS sp ab 2018 pac, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
 
 ## Sans Pacons 
 
@@ -703,7 +711,7 @@ hull.data_2018_pour_pac
 ```
 
 
-``` {r NMDS plot ab 2018, echo = TRUE, results = "hide"}
+``` {r NMDS plot ab 2018, echo = TRUE, results = "hide", eval = FALSE}
 
 data.scores_2018_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
 
@@ -732,7 +740,7 @@ ggplot() +
 ```
 
 
-``` {r NMDS sp ab 2011, echo = FALSE, results = "hide", fig.show = "hide"}
+``` {r NMDS sp ab 2011, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
 
 ## 2011
 nmds_1_2011_pour <- as.data.frame(dat_pourc[c(15:21),-42])
@@ -772,7 +780,7 @@ hull.data_2011_pour
 
 ```
 
-``` {r NMDS sp ab 2011 pac, echo = FALSE, results = "hide", fig.show = "hide"}
+``` {r NMDS sp ab 2011 pac, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
 
 # Sans Pacons 03
 nmds_1_2011_pour_pac <- as.data.frame(dat_pourc[c(15, 16, 18:21),-42])
@@ -814,7 +822,7 @@ hull.data_2011_pour_pac
 ```
 
 
-``` {r NMDS plot ab 2011, echo = FALSE, results = "hide"}
+``` {r NMDS plot ab 2011, echo = FALSE, results = "hide", eval = FALSE}
 ## 2011
 
 data.scores_2011_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
@@ -844,7 +852,7 @@ ggplot() +
 ```
 
 
-``` {r NMDS sp ab 2021, echo = FALSE, results = "hide", fig.show = "hide"}
+``` {r NMDS sp ab 2021, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
 
 ## 2021
 
@@ -885,7 +893,7 @@ hull.data_2021_pour
 
 ```
 
-``` {r NMDS sp ab 2021 pac, echo = FALSE, results = "hide", fig.show = "hide"}
+``` {r NMDS sp ab 2021 pac, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
 
 ## Sans pacons 03
 
@@ -926,7 +934,7 @@ hull.data_2021_pour
 ```
 
 
-```{r NMDS plot ab 2021, echo = FALSE, results="hide"}
+```{r NMDS plot ab 2021, echo = FALSE, results="hide", eval = FALSE}
 
 ## 2021
 
@@ -960,7 +968,7 @@ ggplot() +
 
 On peut ensuite étudier la trajectoire de chaque relevé. Pour cela, on réalise une NMDS générale. Problème : si les stress des NMDS réalisées par années étaient très acceptables, le stress de la NMDS globale n'est pas fou : quasiment 0.2 ! 
 
-```{r NMDS multiDyn, echo = TRUE, results = "show", fig.show = "hide"}
+```{r NMDS multiDyn, echo = TRUE, results = "show", fig.show = "hide", eval = FALSE}
 
 nmds_1_big <- as.data.frame(dat_pourc[,-42])
 nmds_1_big <- arrange(nmds_1_big, Annee)
@@ -999,7 +1007,7 @@ head(species.scores_big)
 ```
 
 
-```{r NMDS sp 2 plot big total, echo = FALSE, results="hide"}
+```{r NMDS sp 2 plot big total, echo = FALSE, results="hide", eval = FALSE}
 
 # Ajout des variables env
 str(relev_var)

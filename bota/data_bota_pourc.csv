@@ -86,7 +86,8 @@ Myosotis alpestris;2018;;;;;;;;;;;;;3;;;;;
 Oxtryopis campestris;2018;;;;3;;;;;;;;;;;;;;
 Phleum rhaeticum;2018;;;;;;;;;;;;;;;;;;
 Pilosella officinarum;2018;;;;;;2;;;;;;;;;;;;
-Pilosella sp.;2018;;+;;;;;;;;;;;;;;;;
+Pilosella peleteriana;2018;;+;;;;;;;;;;;;;;;;
+Pilosella sp.;2018;;;;;;;;;;;;;;;;;;
 Plantago maritima ssp. serpentina;2018;;8;;;;1;;;;;;;;;;;;
 Poa alpina;2018;;;;;;;;;;3;+;2;;;6;2;12;4
 Poa cenisia;2018;;;;;;;5;;;;;;1;;;;;
@@ -102,7 +103,7 @@ Rumex scutatus;2018;;;;;;;;NA;;1;1;;;;;;;
 Sagina glabra;2018;;;;;;;;;;;2;+;;;1;;;
 Salix breviserrata;2018;+;;;;;;;;;;;;;;;;;
 Salix daphnoides;2018;;;;;;;;;;;;;;;;;;
-Salix eleagnos;2018;;;1;8;2;;;;;;;;;;;;;
+Salix eleagnos;2018;;;10;8;2;;;;;;;;;;;;;
 Salix purpurea;2018;;;;+;;;;;;;;;;;;;;
 Salix sp.;2018;;;;;2;;;;;;;;;;;;;
 Saxifraga aizoides;2018;;;;;;;;;;;1;;;;;;;
@@ -138,7 +139,7 @@ Veronica sp.;2018;;;;;;;;;;;;+;;;;;;
 Vincetoxicum hirrudinaria;2018;;;;;;+;;;;;;;;;;;;
 Achillea nana;2021;;;;;;;;;;;;;;;3;;1;
 Achillea distans;2021;;;;;;;;;;;1;;;;;;;
-Achnatherum calamagrostis;2021;;;;;;;;1;;;;;;;;;;
+Achnatherum calamagrostis;2021;;;;1;;;;1;;;;;;;;;;
 Agrostis alpina;2021;;;;;;;;;;;;;;;;;;6
 Agrostis rupestris;2021;;;;;;;;;;+;1;;;;+;+;6;
 Agrostis sp. ;2021;;;;;;;;;;;;;;;;;;
@@ -148,38 +149,39 @@ Alchemilla fissa;2021;;;;;;;;;;;2;;;;;;;
 Alchemilla sp.;2021;;;;;;;;;;;;;;;;;;
 Alchemilla sp.2;2021;;;;;;;;;;;;;;;;;;
 Alchemilla transiens;2021;;;;;;;;;;;1;;;;;;;
-Alnus viridis;2021;;;;;;;;;;;;;;;;;;
+Alnus viridis;2021;20;;;;;;;;;;;;;;;;;
 Androsace adfinis;2021;;;;;;;;;;;;;;;+;;;
 Anthoxatum odoratum;2021;;;;;;;;;2;;;;;;;;;
-Anthyllis vulneraria;2021;;;;;;+;;;15;;4;17;;;;;;
+Anthyllis vulneraria;2021;;+;;;;+;;;15;;4;17;;;;;;
 Arabis alpina;2021;;;;;;;;;;;;;;;;;;
 Arenaria sp.;2021;;;;;;;;;;;;;;;;;;
 Artemisia umbelliformis;2021;;;;;;;;;;;;;;;;;;+
 Asperula cynanchica;2021;;;;;;1;;;;;;;;;;;;
-Betula pendula;2021;;;;;;;;;;;;;;;;;;
-Biscutella laevigata;2021;;;;;;1;1;;;;;;;;;;;
-Botrychum lunaria;2021;;;;;;;;;;;;;;;+;+;+;1
+Betula pendula;2021;5;;;5;;;;;;;;;;;;;;
+Biscutella laevigata;2021;;6;;;;1;1;;;;;;;;;;;
+Botrychum lunaria;2021;;1;;;;;;;;;;;;;+;+;+;1
 Campanula cochlearifolia;2021;;;;;;;;;;;1;;;;;;;2
 Campanula rotundifolia;2021;;;;;;;;;;;;;;;;;;
 Campanula scheuchzeri;2021;;;;;;1;;;;1;;;2;;;;;
 Cardamine alpina;2021;;;;;;;;;;;;;;;;;;
-Cardamine resedifolia;2021;;;;;;;;;;;;;;;;+;1;
+Cardamine resedifolia;2021;+;;;;;;;;;;;;;;;+;1;
 Carduus defloratus;2021;;;;;;;;;;+;;;;;;;;1
 Carex ferruginea;2021;;;;;;;;;;;3;;;;;;;
-Centaurea nervosa;2021;;;;;;;;;;;;;;;;;;
+Centaurea nervosa;2021;;25;;;;;;;;;;;;;;;;
 Cerastium alpinum;2021;;;;;;;;;;;;;;;;;;
-Cerastium arvense;2021;;;;;;;;;;+;+;+;1;;;;1;
+Cerastium arvense;2021;;+;;;;;;;;+;+;+;1;;;;1;
 Cerastium fontanum;2021;;;;;;;;;;;;2;;;;;;
 Cirsium sp. ;2021;;;;;;;;;;;1;;;;;;;
 Clinopodium alpinum;2021;;;;;;;+;;;;;;;;;;;
-Coincya richeri;2021;;;;;;;;;;;;;;;;;;
+Coincya richeri;2021;;5;;;;;;;;;;;;;;;;
 Deschampsia cespitosa;2021;;;;;;;;;;;1;20;;;;;;
 Deschampsia flexuosa;2021;;;;;;10;;;;;;;;2;;;;
 Dianthus saxicola;2021;;;;;;1;;;;;;;;;;;;
 Draba siliquosa;2021;;;;;;;;;;;;;;;;;;
 Epilobium dodonaei;2021;;;;;;;;;;;;;;;;;;
-Epilobium fleischeri;2021;;;;;;;5;;;;;;;+;;;;
+Epilobium fleischeri;2021;8;5;;1;;;5;;;;;;;+;;;;
 Epilobium collinum;2021;;;;;;;;;;+;+;;;;;;;
+Epipactis atrorubens;2021;;;;+;;;;;;;;;;;;;;
 Equisetum arvense;2021;;;;;;;;;;;5;10;;;;;;
 Equisetum sp.;2021;;;;;;;;;;;;;;;;;;
 Erigeron sp.;2021;;;;;;;;;;;;;;;;;;
@@ -188,7 +190,7 @@ Euphorbia cyparissias;2021;;;;;;;;;;;;;;;;;;
 Euphrasia alpina;2021;;;;;;;;;;;;;;;;;;
 Euphrasia minima;2021;;;;;;;;;;;;1;;;+;;;2
 Euphrasia salizburgensis;2021;;;;;;+;;;+;;;;;+;;;;
-Festuca sp.;2021;;;;;;;1;;12;;;;;;;;;
+Festuca sp.;2021;;30;;3;;;1;;12;;;;;;;;;
 Festuca quadriflora;2021;;;;;;;;;;;;;;24;;;2;25
 Festuca rubra gp.;2021;;;;;;12;;1;;;;+;;;;;;
 Festuca violacea;2021;;;;;;;;;;;;;4;;5;+;1;
@@ -197,14 +199,14 @@ Galium pumilum;2021;;;;;;;;1;;;;;;;;;;
 Galium sp.;2021;;;;;;;;;;;;;;;;;;
 Globularia bisnagarica;2021;;;;;;;;;;;;;;;;;;
 Globularia cordifolia;2021;;;;;;4;;;;;;;;;;;;
-Helictotrichon sedenense;2021;;;;;;;1;;;;;;;;;;;
+Helictotrichon sedenense;2021;;1;;;;;1;;;;;;;;;;;
 Helictotrichon sempervirens;2021;;;;;;;;;;;;;;;;;;
 Helianthemum nummularium;2021;;;;;;1;;;;;;;;;;;;
 Hieracium morisianum;2021;;;;;;;;;;;;;;;;;;
 Hieracium piliferum;2021;;;;;;;;;;;;;;;;;;1
 Hieracium umbrosum;2021;;;;;;;;;;;;;;;;;;
-Hieracium sp.;2021;;;;;;;;;;;;;;;;;;
-Hippophae rhamnoides;2021;;;;;;;;;;;;;;;;;;
+Hieracium sp.;2021;;1;;5;;;;;;;;;;;;;;
+Hippophae rhamnoides;2021;;;;3;;;;;;;;;;;;;;
 Imperatoria ostruthium;2021;;;;;;;;;;1;3;+;+;;;;;
 Jacobaea incana;2021;;;;;;;;;;;;;;;1;;;
 Juncus trifidus;2021;;;;;;;;;;;;;;;5;;;
@@ -215,18 +217,22 @@ Leontodon sp.;2021;;;;;;;;;;;;;;;;;;
 Leucanthemopsis alpina;2021;;;;;;;;;;;;;+;;+;+;;1
 Lotus alpinus;2021;;;;;;1;;;8;12;12;20;20;;2;;1;3
 Luzula spicata;2021;;;;;;;;;;;;;;;;;;
-Melampyrum pratense;2021;;;;;;;;;;;;;;;;;;
+Melampyrum pratense;2021;;;;3;;;;;;;;;;;;;;
 Minuartia laricifolia;2021;;;;;;8;;;;;;;;12;;;;1
 Minuartia sedoides;2021;;;;;;;;;;;;;;;;;1;
 Minuartia verna;2021;;;;;;;;;;;;;;;;;2;
 Myosotis alpestris;2021;;;;;;;;;;;;;5;;;;;
-Oxtryopis campestris;2021;;;;;;;;;;;;;;;;;;
+Oxtryopis campestris;2021;;;;3;;;;;;;;;;;;;;
 Phleum rhaeticum;2021;;;;;;;;;;;+;1;;;;;;
 Pilosella officinarum;2021;;;;;;+;;;;1;;;;;;;;
+Pilosella peleteriana;2021;;1;;;;;;;;;;;;;;;;
 Pilosella sp.;2021;;;;;;;;;;;;;;;;;;
+Pinus sylvestris;2021;;;2;;;;;;;;;;;;;;;
+Pinus uncinata;2021;+;;;;;;;;;;;;;;;;;
 Plantago maritima ssp. serpentina;2021;;;;;;1;;;2;;;;;;;;;
-Poa alpina;2021;;;;;;+;;;;+;1;;1;;+;1;6;3
+Poa alpina;2021;;1;;;;+;;;;+;1;;1;;+;1;6;3
 Poa cenisia;2021;;;;;;;1;+;;;;1;8;;;;;
+Poa glauca;2021;+;;;;;;;;;;;;;;;;;
 Poa nemoralis;2021;;;;;;;;;2;7;2;2;;;;;;
 Poa supina;2021;;;;;;;;;;;+;;;;;;;
 Poa sp;2021;;;;;;;;;;;;;;;;;;
@@ -235,12 +241,12 @@ Polytrichum sp.;2021;;;;;;;;;;;;;;;;;;
 Potentille verna;2021;;;;;;10;;;;;;;;;;;;
 Rhinanthus minor;2021;;;;;;;;;;;;;;+;;;;
 Rosa sp.;2021;;;;;;;;;;;;;;;;;;
-Rumex scutatus;2021;;;;;;;+;1;;;1;;;;;;;
+Rumex scutatus;2021;+;;;1;;;+;1;;;1;;;;;;;
 Sagina glabra;2021;;;;;;;;;;+;+;+;;;2;;;
-Salix breviserrata;2021;;;;;;;;;;;;;;;;;;
-Salix daphnoides;2021;;;;;;;;+;;;;;;;;;;
-Salix eleagnos;2021;;;;;;;;;;;;;;;;;;
-Salix purpurea;2021;;;;;;;;;;;;;;;;;;
+Salix breviserrata;2021;+;;30;;;;;;;;;;;;;;;
+Salix daphnoides;2021;1;;;;;;;+;;;;;;;;;;
+Salix eleagnos;2021;;;;10;;;;;;;;;;;;;;
+Salix purpurea;2021;;;;3;;;;;;;;;;;;;;
 Salix sp.;2021;;;;;;;;;;;;;;;;;;
 Saxifraga aizoides;2021;;;;;;;;;;;1;;;;;;;
 Saxifraga bryoides;2021;;;;;;;;;;;;;;;;;;+
@@ -251,25 +257,25 @@ Sedum album;2021;;;;;;;;;;;;;;;;;;
 Sedum alpestre;2021;;;;;;;;;;;;;1;+;;;;
 Sedum dasyphyllum;2021;;;;;;+;;;;;;;;;;;;
 Sedum montanum;2021;;;;;;+;1;;;;;;;;;;;
-Sempervivum arachnoideum;2021;;;;;;4;2;;;;;;;1;+;;10;
+Sempervivum arachnoideum;2021;+;15;;+;;4;2;;;;;;;1;+;;10;
 Sempervivum montanum;2021;;;;;;;;;;;;;2;;+;;;
 Silene acaulis bryoides;2021;;;;;;;;;;;;;;;;;3;3
-Silene otites;2021;;;;;;;;;;;;;;;;;;
+Silene otites;2021;;5;;;;;;;;;;;;;;;;
 Silene vulgaris prostrata;2021;;;;;;;;;5;;;;;;;;;
-Solidago virgaurea;2021;;;;;;;+;;;;;;;;;;;
+Solidago virgaurea;2021;;1;;+;;;+;;;;;;;;;;;
 Sorbus aria;2021;;;;;;+;;;;;;;;;;;;
-Taraxacum sp.;2021;;;;;;;;;1;+;2;;;;;;2;
+Taraxacum sp.;2021;;+;;;;;;;1;+;2;;;;;;2;
 Thesium alpinum;2021;;;;;;;;;;;;;;;;;;
-Thesium sp. ;2021;;;;;;;;;;;;;;;;;;
-Thymus pullegiodes;2021;;;;;;2;;;40;;;;;2;1;2;;4
-Tolpis staticifolia;2021;;;;;;;5;2;20;1;10;;8;;;1;;
+Thesium sp. ;2021;;;;+;;;;;;;;;;;;;;
+Thymus pullegiodes;2021;;;;2;;2;;;40;;;;;2;1;2;;4
+Tolpis staticifolia;2021;+;;1;5;;;5;2;20;1;10;;8;;;1;;
 Trifolium badium;2021;;;;;;;;;2;;2;13;;;;;;12
 Trifolium pratense villosum;2021;;;;;;;;;;2;;;;;;;;
-Trifolium pallescens;2021;;;;;;2;1;;4;1;2;3;;;;;4;8
-Trifolium saxatile;2021;;;;;;1;2;8;;3;;;;;1;1;4;2
+Trifolium pallescens;2021;;1;;;;2;1;;4;1;2;3;;;;;4;8
+Trifolium saxatile;2021;5;;1;3;;1;2;8;;3;;;;;1;1;4;2
 Trifolium thalii;2021;;;;;;;;;;;;;2;;4;+;;
 Tussilago farfara;2021;;;;;;;;;;10;20;16;;;;;;
 Veronica aphylla;2021;;;;;;;;;;;;;;;;;;+
-Veronica fruticans;2021;;;;;;1;;;+;;;;1;1;1;+;;1
+Veronica fruticans;2021;;1;;;;1;;;+;;;;1;1;1;+;;1
 Veronica sp.;2021;;;;;;;;;;;;;;;;;;
 Vincetoxicum hirrudinaria;2021;;;;;;+;;;;;;;;;;;;

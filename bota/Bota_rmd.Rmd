@@ -37,6 +37,7 @@ library(ggplot2)
 library(ggrepel)
 library(RColorBrewer)
 library(remedy)
+library(kableExtra)
 
 ```
 
@@ -119,7 +120,6 @@ dat_prabs_21 <- dat_prabs_21[,c(-1,-2)]
 # on transpose le data frame
 t_dat_prabs_18 <- as.data.frame(t(dat_prabs_18))
 t_dat_prabs_21 <- as.data.frame(t(dat_prabs_21))
-
 t_dat_prabs <- as.data.frame(t(dat_prabs))
 
 
@@ -129,7 +129,6 @@ x <- c("BER_carr","BER_cari","BER_clap","BER_lac1","BER_lac2",
 
 rownames(t_dat_prabs_18) <- x
 rownames(t_dat_prabs_21) <- x
-rownames(t_dat_prabs) <- x
 
 
 rich_18 <- rowSums(t_dat_prabs_18)
@@ -139,9 +138,9 @@ rich_21 <- rowSums(t_dat_prabs_21)
 
 richness <- data.frame(site_18, rich_18, rich_21)
 
+secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),"VALLOUISE","MAURIENNE","VALLOUISE")
 
-richness$secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),
-                         "VALLOUISE","MAURIENNE","VALLOUISE")
+richness$secteur <- secteur
 richness$secteur <- as.factor(richness$secteur)
 
 richness_long <- richness %>% pivot_longer(
@@ -217,10 +216,59 @@ L'indice de Jaccard moyen entre tous les sites en 2018 est de `mb18` et de `mb21
 
 
 ```{r beta diversity tot, fig.show = "hide", echo = "true"}
+# On ne peut mettre qu'un seul tableau en entrée de vegdist, il faut donc ruser pour calculer les distances de Jaccard entre chaque site (année 1 vs année 2)
 
-beta_tot <- vegdist(t_dat_prabs[c(-2),], binary = TRUE, method = "jaccard") ### RESOUDRE LE PB
-beta_tot <- as.matrix(beta_tot)
-beta_tot
+taxons <- rownames(dat_prabs_21)
+
+colnames(dat_prabs_18) <- paste0(colnames(dat_prabs_18),"18") 
+colnames(dat_prabs_21) <- paste0(colnames(dat_prabs_21),"21") 
+
+dat <- vector("list", length(dat_prabs_18))
+ 
+for (i in 1:ncol(dat_prabs_18)) { 
+  dat[[i]] <- cbind(dat_prabs_18[i],dat_prabs_21[i]) 
+}
+ 
+names(dat) <- x
+
+# On a un data frame par site pour les deux années. 
+
+t_dat <- vector ("list", length(dat))
+
+for (i in 1:15) {
+  t_dat[[i]] <- (t(as.data.frame(dat[i])))
+  t_dat[[i]] <- as.data.frame(as.matrix(t_dat[[i]]))
+}
+
+names(t_dat) <- paste0(x,"_t")
+
+# Et la meme chose transposee
+
+# Maintenant on fait la boucle pour calculer les distances sur chaque tableau 
+
+v_dist <- vector("numeric", length(t_dat))
+
+for (i in 1:15) {
+ v_dist[[i]] <- vegdist(t_dat[[i]], binary = TRUE, method = "jaccard") 
+
+}
+
+names(v_dist) <- x
+
+df_v_dist <- as.data.frame(v_dist)
+colnames(df_v_dist) <- "Distance de Jaccard"
+
+df_v_dist <- df_v_dist[ order(row.names(df_v_dist)), ]
+
+df_v_dist %>%
+  kbl() %>%
+  kable_paper(full_width = F) %>%
+  column_spec(2, color =  spec_color(df_v_dist$`Distance de Jaccard`, 
+                                     begin = 0, end = 1)) %>%
+  pack_rows("VENEON", 1,5) %>%
+  pack_rows("MAURIENNE", 6,8) %>%
+  pack_rows("VALLOUISE", 9,13) %>%
+  pack_rows("VILLAROGER", 14,15)
 
 ```
 

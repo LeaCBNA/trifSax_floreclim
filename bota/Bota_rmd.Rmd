@@ -39,15 +39,15 @@ library(RColorBrewer)
 library(remedy)
 library(kableExtra)
 
+library(Renaudpack2)
+
 ```
 
-# 1. Analyses relevés botaniques 2018 - 2021 plots AERMC
+# 1. Protocole
 
-Protocole : relevés botaniques avec abondance exprimée en % absolu (non dégradée en classes). Un relevé à la mise en place des placettes (2018) et un relevé l'année de l'enlèvement des placettes (2021). 
+Relevés botaniques avec abondance exprimée en % absolu (non dégradée en classes). Un relevé à la mise en place des placettes (2018) et un relevé l'année de l'enlèvement des placettes (2021). 
 
-## 1.1 Diversité spécifique
-
-Les listes d'espèces sont dégradées en présence/absence. 
+# 2. Comparaisons inter-placettes
 
 ```{r mise en forme 1, results = "hide"}
 
@@ -127,6 +127,10 @@ x <- c("BER_carr","BER_cari","BER_clap","BER_lac1","BER_lac2",
        "VAL_eyme","MAU_arpo","MAU_plah","VAL_glab","VAL_moba",
        "VIL_bas","VIL_haut","VAL_eyto","MAU_plto","VAL_moha")
 
+y <- c("BER_carr","BER_cari","BER_clap","BER_lacrip",
+       "VAL_eyme","MAU_arpo","MAU_plah","VAL_glab","VAL_moba",
+       "VIL_bas","VIL_haut","VAL_eyto","MAU_plto","VAL_moha")
+
 rownames(t_dat_prabs_18) <- x
 rownames(t_dat_prabs_21) <- x
 
@@ -149,58 +153,14 @@ richness_long <- richness %>% pivot_longer(
   values_drop_na = FALSE) 
 
 student_rich <- t.test(rich_18, rich_21, paired = TRUE)
+````
+                    
 
-ggplot(richness_long, aes(x = site_18, y = rich, fill = year)) +
-  geom_bar(stat = "identity", width =.4, position=position_dodge(), size = 1) +
-  scale_fill_manual(values = c("olivedrab3","orange","turquoise4","blueviolet")) +
-  theme(legend.position = "right", axis.text.x = element_text(angle = 90)) +
-  xlab("Site") +
-  ylab("Specific richness") +
-  annotate("text", x = 4.2, y = 35, label = "P-value Student T.test Specific richness : ") +
-  annotate("text", x = 8.5, y = 35, label = round(student_rich$p.value, 4))
+## 2.1 Distance inter-placettes - indice de Jaccard
 
-```
-
-Sur 12 des 14 sites on a en 2021 plus de taxons observés qu'en 2018. 
-Plusieurs hypothèses :    
-+ c'est un biais observateur, plus forte détection en 2021 pour différentes raisons (date et avancement de la végétation, temps passé sur la placette...) mais paraît peu probable d'une part car cette tendance est la même sur l'ensemble des sites et d'autre part car à priori ce biais s'exprimerait plus sur les abondances que sur la présence/absence ;    
-+ il y a réellement une augmentaton de la diversité spécifique sur les plots en lien avec la végétalisation des dépôts alluviaux et des moraines ;    
-+ mélange des deux.
-
-
-`Specpool` permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). ici, sur 84 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. Ca reste à creuser et ce n'est peut-être pas si intéressant. 
-
-```{r alpha diversity, echo = TRUE}
-
-## POUR 2018
-
-# barplot(specnumber(t_dat_prabs_18), las = 2) # species richness
-
-specpool(t_dat_prabs_18, smallsample = TRUE) # c'est pareil avec ou sans le small sample
-
-#estimateR(t_dat_prabs_18)
-#accum18 <- specaccum(t_dat_prabs_18, method = "random")
-#plot(accum18, random = FALSE, ci.type = "polygon", ci.col = "grey", col = "red")
-#preston18 <- prestonfit(colSums(t_dat_prabs_18))
-#plot(preston18)
-#veiledspec(preston18)
-```
-
-
-```{r alpha diversity 21, echo = TRUE}
-
-specpool(t_dat_prabs_21, smallsample = TRUE)
-
-```
-
-## 1.2 Distance inter-placettes - indice de Jaccard
-
-### 1.2.1 Indice de Jaccard
+### 2.1.1 Indice de Jaccard
 
 L'indice de Jaccard est une mesure de similarité entre plusieurs habitats. Plus l'indice est elevé et plus les échantillons partagent un grand nombre de taxons.
-
-__A FAIRE : mesurer la distance de jaccard entre chaque site 2018 vs 2021.__
-
 
 ```{r beta diversity 1, fig.show = "hide", echo = "true"}
 
@@ -208,76 +168,14 @@ beta_18 <- vegdist(t_dat_prabs_18, binary = TRUE, method = "jaccard")
 beta_18
 mb18 <- mean(beta_18)
 
-beta_21 <- vegdist(t_dat_prabs_21, binary = TRUE, method = "jaccard")
+beta_21 <- vegdist(na.omit(t_dat_prabs_21), binary = TRUE, method = "jaccard")
 beta_21
 mb21 <- mean(beta_21)
 ```
 L'indice de Jaccard moyen entre tous les sites en 2018 est de `mb18` et de `mb21`en 2021. 
 
 
-```{r beta diversity tot, fig.show = "hide", echo = "true"}
-# On ne peut mettre qu'un seul tableau en entrée de vegdist, il faut donc ruser pour calculer les distances de Jaccard entre chaque site (année 1 vs année 2)
-
-taxons <- rownames(dat_prabs_21)
-
-colnames(dat_prabs_18) <- paste0(colnames(dat_prabs_18),"18") 
-colnames(dat_prabs_21) <- paste0(colnames(dat_prabs_21),"21") 
-
-dat <- vector("list", length(dat_prabs_18))
- 
-for (i in 1:ncol(dat_prabs_18)) { 
-  dat[[i]] <- cbind(dat_prabs_18[i],dat_prabs_21[i]) 
-}
- 
-names(dat) <- x
-
-# On a un data frame par site pour les deux années. 
-
-t_dat <- vector ("list", length(dat))
-
-for (i in 1:15) {
-  t_dat[[i]] <- (t(as.data.frame(dat[i])))
-  t_dat[[i]] <- as.data.frame(as.matrix(t_dat[[i]]))
-}
-
-names(t_dat) <- paste0(x,"_t")
-
-# Et la meme chose transposee
-
-# Maintenant on fait la boucle pour calculer les distances sur chaque tableau 
-
-v_dist <- vector("numeric", length(t_dat))
-
-for (i in 1:15) {
- v_dist[[i]] <- vegdist(t_dat[[i]], binary = TRUE, method = "jaccard") 
-
-}
-
-names(v_dist) <- x
-
-df_v_dist <- as.data.frame(v_dist)
-colnames(df_v_dist) <- "Distance de Jaccard"
-
-df_v_dist <- df_v_dist[ order(row.names(df_v_dist)), ]
-
-df_v_dist %>%
-  kbl() %>%
-  kable_paper(full_width = F) %>%
-  column_spec(2, color =  spec_color(df_v_dist$`Distance de Jaccard`, 
-                                     begin = 0, end = 1)) %>%
-  pack_rows("VENEON", 1,5) %>%
-  pack_rows("MAURIENNE", 6,8) %>%
-  pack_rows("VALLOUISE", 9,13) %>%
-  pack_rows("VILLAROGER", 14,15)
-
-```
-
-
-
-
-
-
-### 1.2.2 Regroupement hiérarchique sur les relevés de 2018
+### 2.1.2 Regroupement hiérarchique sur les relevés de 2018
 
 ```{r hclustering, results = "hide", fig.show = "hide"}
 # https://stats.stackexchange.com/questions/195446/choosing-the-right-linkage-method-for-hierarchical-clustering/217742#217742
@@ -372,11 +270,12 @@ fviz_dend(t_dat_prabs_clus_quit_18, k = 8, palette = "Paired", cex = 0.75, lwd =
           main = "Jaccard Beta diversity - WPGMA joining cluster - 2018")
 
 ```
-D'après les relevés de 2018, les placettes de la Bérarde (sauf Carrelet ripisylve) se distinguent des autres. Cette dernière est un peu différente car elle est située sur une terrasse alluviale très ancienne, largement végétalisée et se rapprochant d'une pelouse. Elle est d'ailleurs proche de la placette du bas de moraine de Vallouise. Surprenamment, la placette du torrent de l'Eychaude se rapproche des placettes de Maurienne. 
+D'après les relevés de 2018, les placettes de la Bérarde (sauf Carrelet ripisylve) se distinguent des autres. Cette dernière est un peu différente car elle est située sur une terrasse alluviale très ancienne, largement végétalisée et se rapprochant d'une pelouse. Elle est d'ailleurs proche de la placette du bas de moraine de Vallouise. Surprenamment, la placette du torrent de l'Eychaude se rapproche des placettes de Maurienne.    
 __Attention :__ il faut rappeller que seules les espèces sont prises en comptes dans la comparaison, les recouvrements végétaux n'interviennent pas. 
 
+### 2.1.3 Représentation de la proximité floristique (présence/absence) 2D : NMDS
 
-```{r beta diversity 4, results = "hide", echo = "true"}
+```{r beta diversity 4, results = "hide", echo = "true", fig.show = "hide"}
 # https://rdrr.io/cran/goeveg/man/dimcheckMDS.html
 # avec deux dimensions on n'est pas trop mal meme si 3 seraient bien
 # https://jonlefcheck.net/2012/10/24/nmds-tutorial-in-r/
@@ -392,8 +291,8 @@ stressplot(NMDS_18)
 
 ```{r beta diversity 5, results = "hide", fig.show = "hide"}
 
-secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),
-             "VALLOUISE","MAURIENNE","VALLOUISE")
+secteur <- c(rep("VENEON",5), "VALLOUISE", rep("MAURIENNE",2), rep("VALLOUISE",2), rep("VILLAROGER",2),"VALLOUISE","MAURIENNE","VALLOUISE")
+
 # secteurs
 ordiplot(NMDS_18, type = "n")
 orditorp(NMDS_18, display = "species", col = "black", air = 0.01, label = F)
@@ -441,7 +340,7 @@ ggplot() +
   
 ```  
 
-## 1.3 Indice de Sorensen
+## 2.2 Indice de Sorensen
 
 ```{r sorensen 1, echo = "true"}
 
@@ -450,28 +349,149 @@ d_21 <- betadiver(t_dat_prabs_21, "w") ## This should be equal to Sorensen index
 d_18
 d_21
 
+ms18 <- mean(d_18)
+ms21 <- mean(d_21)
+
 # voir :
 ## https://sites.google.com/site/mb3gustame/hypothesis-tests/the-mantel-test
 ## https://mb3is.megx.net/gustame/dissimilarity-based-methods/nmds
 
 ```
 
+L'indice de Sorensen moyen entre tous les sites en 2018 est de `ms18` et de `ms21`en 2021. 
 
-## 1.4 Comparaison de la diversité alpha globale des deux années 
+
+# 3 Comparaison inter-années
+
+## 3.1 Diversité spécifique
+
+```{r alpha plot, echo = "true"}
+ggplot(richness_long, aes(x = site_18, y = rich, fill = year)) +
+  geom_bar(stat = "identity", width =.4, position=position_dodge(), size = 1) +
+  scale_fill_manual(values = c("olivedrab3","orange","turquoise4","blueviolet")) +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 90)) +
+  xlab("Site") +
+  ylab("Specific richness") +
+  annotate("text", x = 4.2, y = 35, label = "P-value Student T.test Specific richness : ") +
+  annotate("text", x = 8.5, y = 35, label = round(student_rich$p.value, 4))
+
+```
+
+Sur 12 des 14 sites on a en 2021 plus de taxons observés qu'en 2018. 
+Plusieurs hypothèses :    
++ + + c'est un biais observateur, plus forte détection en 2021 pour différentes raisons (date et avancement de la végétation, temps passé sur la placette...) mais paraît peu probable d'une part car cette tendance est la même sur l'ensemble des sites et d'autre part car à priori ce biais s'exprimerait plus sur les abondances que sur la présence/absence ;    
++ + + il y a réellement une augmentaton de la diversité spécifique sur les plots en lien avec la végétalisation des dépôts alluviaux et des moraines ;    
++ + + mélange des deux.
+
+__A noter :__ la placette "plan du lac torrent" a été détruite en 2021 et les traits, comptages et relevés n'ont donc pas été réalisés.  
+
+## 3.2 Indice de Jaccard
+
+On calcule maintenant l'indice de Jaccard pour chaque placette entre 2018 et 2021. 
+
+```{r beta diversity tot, fig.show = "hide", echo = "true"}
+# On ne peut mettre qu'un seul tableau en entrée de vegdist, il faut donc ruser pour calculer les distances de Jaccard entre chaque site (année 1 vs année 2)
+
+taxons <- rownames(dat_prabs_21)
+
+colnames(dat_prabs_18) <- paste0(colnames(dat_prabs_18),"18") 
+colnames(dat_prabs_21) <- paste0(colnames(dat_prabs_21),"21") 
+
+dat <- vector("list", 14) # on ne prend pas en compte "lac torrent" détruite en 2021
+ 
+for (i in 1:14) { 
+  dat[[i]] <- cbind(dat_prabs_18[,-5][i],dat_prabs_21[,-5][i]) 
+}
+
+names(dat) <- y
+
+# On a un data frame par site pour les deux années. 
+
+t_dat <- vector ("list", length(dat))
+
+for (i in 1:14) {
+  t_dat[[i]] <- (t(as.data.frame(dat[i])))
+  t_dat[[i]] <- as.data.frame(as.matrix(t_dat[[i]]))
+}
+
+names(t_dat) <- paste0(y,"_t")
+
+# Et la meme chose transposee
+
+# Maintenant on fait la boucle pour calculer les distances sur chaque tableau 
+
+v_dist <- vector("numeric", length(t_dat))
+
+for (i in 1:14) { 
+ v_dist[[i]] <- vegdist(t_dat[[i]], binary = TRUE, method = "jaccard") 
+
+}
+
+names(v_dist) <- y
+
+df_v_dist <- as.data.frame(v_dist)
+colnames(df_v_dist) <- "Dist_Jaccard"
+
+df_v_dist <- df_v_dist[order(rownames(df_v_dist)), , drop = F]
+
+df_v_dist %>%
+  kbl() %>%
+  kable_paper(full_width = F) %>%
+  column_spec(2, color =  spec_color(df_v_dist$Dist_Jaccard, begin = 0, end = 1)) %>%
+  pack_rows("VENEON", 1,4) %>%
+  pack_rows("MAURIENNE", 5,7) %>%
+  pack_rows("VALLOUISE", 8,12) %>%
+  pack_rows("VILLAROGER", 13,14)
+
+```
+
+
+Certaines placettes ont une faible similarité (Villaroger haut, Vallouise Glacier blanc) indiquant un grand changement de la composition entre 2018 et 2021. La majorité des indices tourne entre 0.5 et 0.75. C'est sur Bérarde Clapier que la similarité 2018/2021 est la plus importante. 
+
+
+
+
+`Specpool` permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). ici, sur 84 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. Ca reste à creuser et ce n'est peut-être pas si intéressant.    
+
+
+
+```{r alpha diversity, echo = TRUE}
+
+## POUR 2018
+
+# barplot(specnumber(t_dat_prabs_18), las = 2) # species richness
+
+specpool(t_dat_prabs_18, smallsample = TRUE) # c'est pareil avec ou sans le small sample
+
+#estimateR(t_dat_prabs_18)
+#accum18 <- specaccum(t_dat_prabs_18, method = "random")
+#plot(accum18, random = FALSE, ci.type = "polygon", ci.col = "grey", col = "red")
+#preston18 <- prestonfit(colSums(t_dat_prabs_18))
+#plot(preston18)
+#veiledspec(preston18)
+```
+
+
+```{r alpha diversity 21, echo = TRUE}
+
+## POUR 2021
+specpool(na.omit(t_dat_prabs_21), smallsample = TRUE)
+
+```
 
 ```{r comp alpha, results = "hide"}
 # ?
-x <- rowSums(dat_prabs_18)
+rs_18 <- rowSums(dat_prabs_18)
 taxons_18 <- as.data.frame(rownames(dat_prabs_18))
-taxons_18$somme <- x
+taxons_18$somme <- rs_18
 
 supp_18 <- which(taxons_18$somme == 0)
 taxons_18 <- taxons_18[-supp_18,]
 tax_18 <- taxons_18[,1]
 
-y <- rowSums(dat_prabs_21)
+rs_21 <- rowSums(dat_prabs_21)
 taxons_21 <- as.data.frame(rownames(dat_prabs_21))
-taxons_21$somme <- y
+taxons_21$somme <- rs_21
 
 supp_21 <- which(taxons_21$somme == 0)
 taxons_21 <- taxons_21[-supp_21,]
@@ -494,12 +514,13 @@ for (j in 1:ncol(dat_prabs_18_tax)){
   
   else NULL
   
-}}
+  }}
+
 dat_prabs_18_tax[dat_prabs_18_tax == 0] <- NA
 
 
 
-dat_prabs_21_tax <- dat_prabs_21[,c(6,9,10,13,15)] # conserver toutes les lignes une fois tout saisi
+dat_prabs_21_tax <- dat_prabs_21[,-5] # on enlève encore lac torrent
 
 
 for (j in 1:ncol(dat_prabs_21_tax)){
@@ -510,7 +531,8 @@ for (j in 1:ncol(dat_prabs_21_tax)){
 
     else NULL
     
-}}
+  }}
+
 dat_prabs_21_tax[dat_prabs_21_tax == 0] <- NA
 
 
@@ -525,7 +547,7 @@ for (j in 1:ncol(dat_prabs_18_tax)) {
   chr_list_18[[j]] = chr_18
   }
 
-names(chr_list_18) <- paste(colnames(dat_prabs_18_tax),"_18", sep='')
+names(chr_list_18) <- paste(colnames(dat_prabs_18_tax), sep='')
 
 
 
@@ -538,33 +560,24 @@ for (j in 1:ncol(dat_prabs_21_tax)) {
   
 }
 
-names(chr_list_21) <- paste(colnames(dat_prabs_21_tax),"_21", sep='')
+names(chr_list_21) <- paste(colnames(dat_prabs_21_tax), sep='')
 
 ```
 
+## 3.3 Exemple de comparaison de données (Eychauda mélézin)
 
-```{r comp alpha 3, results = "hide"}
-# exemple de comparaison de données
-intersect(chr_list_21$EYCH_meleze_21, chr_list_18$EYCH_meleze_18)
+```{r comp alpha 3, , echo = "true"}
+# Elements communs
+intersect(chr_list_21$EYCH_meleze21, chr_list_18$EYCH_meleze18)
 
-a1 <- setdiff(chr_list_21$EYCH_meleze_21, chr_list_18$EYCH_meleze_18) # elements dans 21 mais pas dans 18
-a2 <- setdiff(chr_list_18$EYCH_meleze_18, chr_list_21$EYCH_meleze_21)
+# Elements dans 21 mais pas dans 18
+setdiff(chr_list_21$EYCH_meleze21, chr_list_18$EYCH_meleze18) 
 
-# De nombreuses espèces supplémentaires en 21 mais on est sur une placette très grande donc il y a 
-#probabalement de la sous-observation en 18. 
-
+# Elements dans 18 mais pas dans 21
+setdiff(chr_list_18$EYCH_meleze18, chr_list_21$EYCH_meleze21)
 ```
 
-
-
-
-
-
-
-
-
-
-
+De nombreuses espèces suplémentaires en 21 mais on est sur une placette très grande donc il y a probabalement de la sous-observation en 18.
 
 
 
@@ -641,15 +654,36 @@ ggplot(prov_long, aes(x = type, y = nombre, fill = site)) +
 
 ```
 
-# A faire : analyses avec l'abondance -> NMDS et trajectoires comme Renaud (Juncus squarrosus)
-# ATTENTION c'est de vrac copié ds analyses Juncus !
+## 3.4 Représentation de la proximité floristique (abondance) et des trajectoires inter-années 2D : NMDS
 
-```{r pourc, results = "hide", eval = FALSE}
+A faire : analyses avec l'abondance -> NMDS et trajectoires comme Renaud (Juncus squarrosus)
+ATTENTION c'est de vrac copié ds analyses Juncus !
+
+Certaines placettes sont scindées en plusieurs morceaux et les relevés bota ont été réalisés séparément. Il faudrait merger les abondances pour renseigner la liste de taxons pour un site sur une seule colonne. 
+
+De plus, on a certains taxons dont on ne connaît pas l'abondance et les NA ne sont pas acceptés pour calculer les NMDS. On les remplace mannuellement par la valeur de 2021. 
+
+
+```{r pourc, results = "hide"}
 
 dat_pourc <- read.table("data_bota_pourc.csv", header=T, sep=";", dec=".")
 dat_pourc[dat_pourc=="+"] <- 0.1 # remplacement du + BB pour faire le BBtransf
 dat_pourc[dat_pourc==""] <- 0 # remplacement du + BB pour faire le BBtransf
 
+# Gestion des NAs
+
+dat_pourc[,5][is.na(dat_pourc[,5])] <- 0 # Probleme de NA avec la colonne 5
+
+which(is.na(dat_pourc),arr.ind=TRUE) # Remplacement des NA par leur valeur de 2021
+
+dat_pourc[131,6] <- dat_pourc[274,6] 
+dat_pourc[135,9] <- dat_pourc[277,9] 
+dat_pourc[105,10] <- dat_pourc[243,10] 
+dat_pourc[132,10] <- dat_pourc[274,10] 
+dat_pourc[136,10] <- dat_pourc[278,10] 
+dat_pourc[125,11] <- dat_pourc[267,11]
+
+# Nice
 
 d18 <- which(dat_pourc$year == "2018")
 dat_pourc_18 <- dat_pourc[d18,]
@@ -669,111 +703,75 @@ colnames(dat_pourc_21) <- dat_pourc_21[1,]
 dat_pourc_21 <- dat_pourc_21[-1,]
 dat_pourc_21 <- as.data.frame(dat_pourc_21)
 
+
+dat_pourc <- rbind.data.frame(dat_pourc_18, dat_pourc_21)
+
+year <- c(rep("2018",18), rep("2021",18))
+dat_pourc <- cbind(year,dat_pourc)
+
 ```
 
-### NMDS abondance
 
 La NMDS est une méthode de représentation permettant de traduire les relations de X relevés en X dimensions en une représentation 2 (ou plus) D en se basant sur les distances de Bray-Curtis. 
-On peut la faire en présence/absence, ou en abondance (comme ici). Pour ça, il suffit de changer l'argument `binary = TRUE` en `binary = FALSE`. 
+On peut la faire en présence/absence (voir plus haut), ou en abondance (comme ici). Pour ça, il suffit de changer l'argument `binary = TRUE` en `binary = FALSE`. 
 
 
-``` {r NMDS sp ab 2018, echo = TRUE, results = "hide", fig.show = "hide", eval = FALSE}
+``` {r NMDS sp ab 2018, echo = TRUE, results = "hide", fig.show = "hide"}
 
 ## 2018
-nmds_2018_pour <- as.data.frame(dat_pourc_18[(-3),]) # on enlève la colonne pleine de NA
+nmds_2018_pour <- as.data.frame(dat_pourc_18) 
 
-nmds_2018_pour <- nmds_2018_pour[,c(1:137)] %>%
+nmds_2018_pour <- nmds_2018_pour[,c(1:142)] %>%
 map_dfr(as.numeric)
 
 nmds_2018_pour <- as.matrix(nmds_2018_pour)
 
-set.seed(123)
-nmds_tot_2018_pour <- metaMDS(nmds_2018_pour, trymax = 100, distance = "bray", binary = FALSE) # Il faut faire qqchose avec les NA si on veut la NMDS en abondance
 
-# Il doit falloir transposer la matrice pour avoir les sites en colonnes
-               
+set.seed(123)
+nmds_tot_2018_pour <- metaMDS(nmds_2018_pour, trymax = 100, distance = "bray", 
+                              binary = FALSE, na.rm = TRUE) 
+
 nmds_tot_2018_pour
-stressplot(nmds_tot_2018_pour)
+stressplot(nmds_tot_2018_pour) # vérification
 plot(nmds_tot_2018_pour)
 
-data.scores_2018_pour <- as.data.frame(scores(nmds_tot_2018_pour))
 
-data.scores_2018_pour$Lieu <- nmds_1_2018_pour$Lieu
+data.scores_2018_pour <- as.data.frame(scores(nmds_tot_2018_pour)) # Sites
+data.scores_2018_pour$site <- rownames(dat_pourc_18)
+data.scores_2018_pour$secteur <- c(rep("VENEON",5), rep("VALLOUISE",3), rep("MAURIENNE",4), rep("VALLOUISE",4), rep("VILLAROGER",2))
 
-
-species.scores_2018_pour <- as.data.frame(scores(nmds_tot_2018_pour, "species"))
-species.scores_2018_pour$species <- rownames(species.scores_2018_pour)  
-head(species.scores_2018_pour)
-
-
-Pacons_pour <- data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Pacons", ][chull(data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
-
-Montauds_pour <- data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Montauds", ][chull(data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
-
-Narces_pour <- data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Narces", ][chull(data.scores_2018_pour[data.scores_2018_pour$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+species.scores_2018_pour <- as.data.frame(scores(nmds_tot_2018_pour, "species")) # Taxons
+species.scores_2018_pour$species <- rownames(species.scores_2018_pour)
 
 
-hull.data_2018_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)  
+veneon_pour <- data.scores_2018_pour[data.scores_2018_pour$secteur == "VENEON", ][chull(data.scores_2018_pour[data.scores_2018_pour$secteur == "VENEON", c("NMDS1", "NMDS2")]), ] 
+
+vallouise_pour <- data.scores_2018_pour[data.scores_2018_pour$secteur == "VALLOUISE", ][chull(data.scores_2018_pour[data.scores_2018_pour$secteur == "VALLOUISE", c("NMDS1", "NMDS2")]), ]
+
+maurienne_pour <- data.scores_2018_pour[data.scores_2018_pour$secteur == "MAURIENNE", ][chull(data.scores_2018_pour[data.scores_2018_pour$secteur == "MAURIENNE", c("NMDS1", "NMDS2")]), ]
+
+villaroger_pour <- data.scores_2018_pour[data.scores_2018_pour$secteur == "VILLAROGER", ][chull(data.scores_2018_pour[data.scores_2018_pour$secteur == "VILLAROGER", c("NMDS1", "NMDS2")]), ]
+
+
+hull.data_2018_pour <- rbind(veneon_pour, vallouise_pour, maurienne_pour, villaroger_pour)  
+
 hull.data_2018_pour
 ```
 
-``` {r NMDS sp ab 2018 pac, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
-
-## Sans Pacons 
-
-nmds_1_2018_pour_pac <- as.data.frame(dat_pourc[c(1,2,4:7),-42])
-nmds_2018_pour_pac <- nmds_1_2018_pour_pac[,c(-1:-3)]
-
-nmds_2018_pour_pac <- nmds_2018_pour_pac[,c(1:38)] %>%
-map_dfr(as.numeric)
-
-nmds_2018_pour_pac <- as.matrix(nmds_2018_pour_pac)
-
-set.seed(123)
-nmds_tot_2018_pour_pac <- metaMDS(nmds_2018_pour_pac, trymax = 100, distance = "bray", binary = FALSE)
-               
-nmds_tot_2018_pour_pac
-stressplot(nmds_tot_2018_pour_pac)
-plot(nmds_tot_2018_pour_pac)
-
-data.scores_2018_pour_pac <- as.data.frame(scores(nmds_tot_2018_pour_pac))
-
-data.scores_2018_pour_pac$Lieu <- nmds_1_2018_pour_pac$Lieu
-
-
-species.scores_2018_pour_pac <- as.data.frame(scores(nmds_tot_2018_pour_pac, "species"))
-species.scores_2018_pour_pac$species <- rownames(species.scores_2018_pour_pac)  
-head(species.scores_2018_pour_pac)
-
-
-Pacons_pour_pac <- data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Pacons", ][chull(data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
-
-Montauds_pour_pac <- data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Montauds", ][chull(data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
-
-Narces_pour_pac <- data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Narces", ][chull(data.scores_2018_pour_pac[data.scores_2018_pour_pac$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
-
-
-hull.data_2018_pour_pac <- rbind(Pacons_pour_pac, Montauds_pour_pac, Narces_pour_pac)  
-hull.data_2018_pour_pac
-
-```
-
-
-``` {r NMDS plot ab 2018, echo = TRUE, results = "hide", eval = FALSE}
-
-data.scores_2018_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
+``` {r NMDS plot ab 2018, echo = TRUE, results = "hide"}
 
 ggplot() + 
-  geom_text_repel(data = species.scores_2018_pour, aes(x = NMDS1, y = NMDS2, label = species), 
-                  alpha = 0.5,  color = "grey70") +
-  geom_point(data = data.scores_2018_pour, aes(x = NMDS1, y = NMDS2, color = Lieu), 
+  geom_text_repel(data = species.scores_2018_pour, aes(x = NMDS1, y = NMDS2, 
+                 label = species), alpha = 0.5,  color = "grey70") +
+  geom_point(data = data.scores_2018_pour, aes(x = NMDS1, y = NMDS2, color = secteur), 
              size = 3.5, alpha = 0.5) +
-  geom_text_repel(data = data.scores_2018_pour,aes(x = NMDS1, y = NMDS2, color = Lieu, label = tiquet)) +
-  geom_point(data = species.scores_2018_pour, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
-             color = "grey70") +
+  geom_text_repel(data = data.scores_2018_pour, aes(x = NMDS1, y = NMDS2, 
+            color =  secteur, label = site)) +
+  geom_point(data = species.scores_2018_pour, aes(x = NMDS1, y = NMDS2), size = 2, 
+             pch = 1, color = "grey70") +
   coord_equal() +
   theme_bw() +
-  scale_color_jcolors(palette = "pal7") +
+  scale_color_manual(values = c("olivedrab3","orange","turquoise4","blueviolet")) +
   theme(axis.text.x = element_blank(),  
         axis.text.y = element_blank(), 
         axis.ticks = element_blank(),  
@@ -783,222 +781,71 @@ ggplot() +
         panel.grid.major = element_blank(),  
         panel.grid.minor = element_blank(), 
         plot.background = element_blank()) +
-  ggtitle(label = "NMDS 2018 (stress = 0.038)")
+  ggtitle(label = "NMDS 2018 (stress = 0.1936)")
 
 ```
+Sans surprise on retrouve deux pools constitués respectivement des placettes de Maurienne et de Villaroger qui se rapprochent floristiquement. Ces deux pools sont relativement proches entre eux, et se rapprochent également des placettes de Vallouise, qui ne forment pas un pool distinct mais se répartissent autour des deux précédents. __A noter les sous-placettes qu'il faudrait regrouper, celles de la placette Vallouise_moraine_haut se retrouvent proches mais celles d'Eychauda torrent sont assez éloignées.__  
+
+Les placettes de La Bérarde sont bien distinctes, entre elles et avec toutes les placettes de Maurienne, Vallouise et Villaroger. On a une ségrégation horizontale entre les domaines versant/moraine et fluvio-glaciaire.  
 
 
-``` {r NMDS sp ab 2011, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
-
-## 2011
-nmds_1_2011_pour <- as.data.frame(dat_pourc[c(15:21),-42])
-nmds_2011_pour <- nmds_1_2011_pour[,c(-1:-3)]
-
-nmds_2011_pour <- nmds_2011_pour[,c(1:38)] %>%
-map_dfr(as.numeric)
-
-nmds_2011_pour <- as.matrix(nmds_2011_pour)
-
-set.seed(123)
-nmds_tot_2011_pour <- metaMDS(nmds_2011_pour, trymax = 100, distance = "bray", binary = FALSE)
-               
-nmds_tot_2011_pour
-stressplot(nmds_tot_2011_pour)
-plot(nmds_tot_2011_pour)
-
-data.scores_2011_pour <- as.data.frame(scores(nmds_tot_2011_pour))
-
-data.scores_2011_pour$Lieu <- nmds_1_2011_pour$Lieu
-
-
-species.scores_2011_pour <- as.data.frame(scores(nmds_tot_2011_pour, "species"))
-species.scores_2011_pour$species <- rownames(species.scores_2011_pour)  
-head(species.scores_2011_pour)
-
-
-Pacons_pour <- data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Pacons", ][chull(data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
-
-Montauds_pour <- data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Montauds", ][chull(data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
-
-Narces_pour <- data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Narces", ][chull(data.scores_2011_pour[data.scores_2011_pour$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
-
-
-hull.data_2011_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)  
-hull.data_2011_pour
-
-```
-
-``` {r NMDS sp ab 2011 pac, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
-
-# Sans Pacons 03
-nmds_1_2011_pour_pac <- as.data.frame(dat_pourc[c(15, 16, 18:21),-42])
-nmds_2011_pour_pac <- nmds_1_2011_pour_pac[,c(-1:-3)]
-
-nmds_2011_pour_pac <- nmds_2011_pour_pac[,c(1:38)] %>%
-map_dfr(as.numeric)
-
-nmds_2011_pour_pac <- as.matrix(nmds_2011_pour_pac)
-
-set.seed(123)
-nmds_tot_2011_pour_pac <- metaMDS(nmds_2011_pour_pac, trymax = 100, distance = "bray", binary = FALSE)
-               
-nmds_tot_2011_pour_pac
-stressplot(nmds_tot_2011_pour_pac)
-plot(nmds_tot_2011_pour_pac)
-
-data.scores_2011_pour_pac <- as.data.frame(scores(nmds_tot_2011_pour_pac))
-
-data.scores_2011_pour_pac$Lieu <- nmds_1_2011_pour_pac$Lieu
-
-
-species.scores_2011_pour_pac <- as.data.frame(scores(nmds_tot_2011_pour_pac, "species"))
-species.scores_2011_pour_pac$species <- rownames(species.scores_2011_pour_pac)  
-head(species.scores_2011_pour_pac)
-
-
-Pacons_pour_pac <- data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Pacons", ][chull(data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
-
-Montauds_pour_pac <- data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Montauds", ][chull(data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
-
-Narces_pour_pac <- data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Narces", ][chull(data.scores_2011_pour_pac[data.scores_2011_pour_pac$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
-
-
-hull.data_2011_pour_pac <- rbind(Pacons_pour_pac, Montauds_pour_pac, Narces_pour_pac)  
-hull.data_2011_pour_pac
-
-
-```
-
-
-``` {r NMDS plot ab 2011, echo = FALSE, results = "hide", eval = FALSE}
-## 2011
-
-data.scores_2011_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
-
-ggplot() + 
-  geom_text_repel(data = species.scores_2011_pour, aes(x = NMDS1, y = NMDS2, label = species), 
-                  alpha = 0.5,  color = "grey70") +
-  geom_point(data = data.scores_2011_pour, aes(x = NMDS1, y = NMDS2, color = Lieu), 
-             size = 3.5, alpha = 0.5) +
-  geom_text_repel(data = data.scores_2011_pour, aes(x = NMDS1, y = NMDS2, color = Lieu, label = tiquet)) +
-  geom_point(data = species.scores_2011_pour, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
-             color = "grey70") +
-  coord_equal() +
-  theme_bw() +
-  scale_color_jcolors(palette = "pal7") +
-  theme(axis.text.x = element_blank(),  
-        axis.text.y = element_blank(), 
-        axis.ticks = element_blank(),  
-        axis.title.x = element_text(size = 18), 
-        axis.title.y = element_text(size = 18), 
-        panel.background = element_blank(), 
-        panel.grid.major = element_blank(),  
-        panel.grid.minor = element_blank(), 
-        plot.background = element_blank()) +
-  ggtitle(label = "NMDS 2011 (stress = 5.86 X 10-05)")
-        
-```
-
-
-``` {r NMDS sp ab 2021, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
+``` {r NMDS sp ab 2021, echo = TRUE, results = "hide", fig.show = "hide"}
 
 ## 2021
+nmds_2021_pour <- as.data.frame(dat_pourc_21[-5,]) 
 
-nmds_1_2021_pour <- as.data.frame(dat_pourc[c(8:14),-42])
-nmds_2021_pour <- nmds_1_2021_pour[,c(-1:-3)]
-
-nmds_2021_pour <- nmds_2021_pour[,c(1:38)] %>%
+nmds_2021_pour <- nmds_2021_pour[,c(1:142)] %>%
 map_dfr(as.numeric)
 
 nmds_2021_pour <- as.matrix(nmds_2021_pour)
 
 set.seed(123)
-nmds_tot_2021_pour <- metaMDS(nmds_2021_pour, trymax = 100, distance = "bray", binary = FALSE)
-               
+nmds_tot_2021_pour <- metaMDS(nmds_2021_pour, trymax = 100, distance = "bray", 
+                              binary = FALSE, na.rm = TRUE) 
+
 nmds_tot_2021_pour
-stressplot(nmds_tot_2021_pour)
+stressplot(nmds_tot_2021_pour) # vérification
 plot(nmds_tot_2021_pour)
 
-data.scores_2021_pour <- as.data.frame(scores(nmds_tot_2021_pour))
 
-data.scores_2021_pour$Lieu <- nmds_1_2021_pour$Lieu
-
-
-species.scores_2021_pour <- as.data.frame(scores(nmds_tot_2021_pour, "species"))
-species.scores_2021_pour$species <- rownames(species.scores_2021_pour)  
-head(species.scores_2021_pour)
+data.scores_2021_pour <- as.data.frame(scores(nmds_tot_2021_pour)) # Sites
+data.scores_2021_pour$site <- rownames(dat_pourc_21[-5,])
+data.scores_2021_pour$secteur <- c(rep("VENEON",4), rep("VALLOUISE",3), rep("MAURIENNE",4), rep("VALLOUISE",4), rep("VILLAROGER",2))
 
 
-Pacons_pour <- data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Pacons", ][chull(data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
 
-Montauds_pour <- data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Montauds", ][chull(data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
-
-Narces_pour <- data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Narces", ][chull(data.scores_2021_pour[data.scores_2021_pour$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
+species.scores_2021_pour <- as.data.frame(scores(nmds_tot_2021_pour, "species")) # Taxons
+species.scores_2021_pour$species <- rownames(species.scores_2021_pour)
 
 
-hull.data_2021_pour <- rbind(Pacons_pour, Montauds_pour, Narces_pour)  
-hull.data_2021_pour
+veneon_pour_21 <- data.scores_2021_pour[data.scores_2021_pour$secteur == "VENEON", ][chull(data.scores_2021_pour[data.scores_2021_pour$secteur == "VENEON", c("NMDS1", "NMDS2")]), ]
 
-```
+vallouise_pour_21 <- data.scores_2021_pour[data.scores_2021_pour$secteur == "VALLOUISE", ][chull(data.scores_2021_pour[data.scores_2021_pour$secteur == "VALLOUISE", c("NMDS1", "NMDS2")]), ]
 
-``` {r NMDS sp ab 2021 pac, echo = FALSE, results = "hide", fig.show = "hide", eval = FALSE}
+maurienne_pour_21 <- data.scores_2021_pour[data.scores_2021_pour$secteur == "MAURIENNE", ][chull(data.scores_2021_pour[data.scores_2021_pour$secteur == "MAURIENNE", c("NMDS1", "NMDS2")]), ]
 
-## Sans pacons 03
-
-nmds_1_2021_pour_pac <- as.data.frame(dat_pourc[c(8,9,11:14),-42]) # on enleve pacons 03
-nmds_2021_pour_pac <- nmds_1_2021_pour_pac[,c(-1:-3)]
-
-nmds_2021_pour_pac <- nmds_2021_pour_pac[,c(1:38)] %>%
-map_dfr(as.numeric)
-
-nmds_2021_pour_pac <- as.matrix(nmds_2021_pour_pac)
-
-set.seed(123)
-nmds_tot_2021_pour_pac <- metaMDS(nmds_2021_pour_pac, trymax = 100, distance = "bray", binary = FALSE)
-               
-nmds_tot_2021_pour_pac
-stressplot(nmds_tot_2021_pour_pac)
-plot(nmds_tot_2021_pour_pac)
-
-data.scores_2021_pour_pac <- as.data.frame(scores(nmds_tot_2021_pour_pac))
-
-data.scores_2021_pour_pac$Lieu <- nmds_1_2021_pour_pac$Lieu
+villaroger_pour_21 <- data.scores_2021_pour[data.scores_2021_pour$secteur == "VILLAROGER", ][chull(data.scores_2021_pour[data.scores_2021_pour$secteur == "VILLAROGER", c("NMDS1", "NMDS2")]), ]
 
 
-species.scores_2021_pour_pac <- as.data.frame(scores(nmds_tot_2021_pour_pac, "species"))
-species.scores_2021_pour_pac$species <- rownames(species.scores_2021_pour_pac)  
-head(species.scores_2021_pour_pac)
+hull.data_2021_pour <- rbind(veneon_pour_21, vallouise_pour_21, maurienne_pour_21, villaroger_pour_21)  
 
-
-Pacons_pour_pac <- data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Pacons", ][chull(data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Pacons", c("NMDS1", "NMDS2")]), ]  # hull values for T1
-
-Montauds_pour_pac <- data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Montauds", ][chull(data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Montauds", c("NMDS1", "NMDS2")]), ]
-
-Narces_pour_pac <- data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Narces", ][chull(data.scores_2021_pour_pac[data.scores_2021_pour_pac$Lieu == "Les Narces", c("NMDS1", "NMDS2")]), ]
-
-
-hull.data_2021_pour <- rbind(Pacons_pour_pac, Montauds_pour_pac, Narces_pour_pac)  
 hull.data_2021_pour
 ```
 
-
-```{r NMDS plot ab 2021, echo = FALSE, results="hide", eval = FALSE}
-
-## 2021
-
-data.scores_2021_pour$tiquet <- c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02")
+``` {r NMDS plot ab 2021, echo = TRUE, results = "hide"}
 
 ggplot() + 
-  geom_text_repel(data = species.scores_2021_pour, aes(x = NMDS1, y = NMDS2, label = species), 
-                  alpha = 0.5,  color = "grey70") +
-  geom_point(data = data.scores_2021_pour, aes(x = NMDS1, y = NMDS2, color = Lieu), 
+  geom_text_repel(data = species.scores_2021_pour, aes(x = NMDS1, y = NMDS2, 
+                 label = species), alpha = 0.5,  color = "grey70") +
+  geom_point(data = data.scores_2021_pour, aes(x = NMDS1, y = NMDS2, color = secteur), 
              size = 3.5, alpha = 0.5) +
-  geom_text_repel(data = data.scores_2021_pour,aes(x = NMDS1, y = NMDS2, color = Lieu, label = tiquet)) +
-  geom_point(data = species.scores_2021_pour, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
-             color = "grey70") +
+  geom_text_repel(data = data.scores_2021_pour, aes(x = NMDS1, y = NMDS2, 
+            color =  secteur, label = site)) +
+  geom_point(data = species.scores_2021_pour, aes(x = NMDS1, y = NMDS2), size = 2, 
+             pch = 1, color = "grey70") +
   coord_equal() +
   theme_bw() +
-  scale_color_jcolors(palette = "pal7") +
+  scale_color_manual(values = c("olivedrab3","orange","turquoise4","blueviolet")) +
   theme(axis.text.x = element_blank(),  
         axis.text.y = element_blank(), 
         axis.ticks = element_blank(),  
@@ -1008,68 +855,74 @@ ggplot() +
         panel.grid.major = element_blank(),  
         panel.grid.minor = element_blank(), 
         plot.background = element_blank()) +
-  ggtitle(label = "NMDS 2021 (stress = 8.34 X 10-05)")
-
+  ggtitle(label = "NMDS 2021 (stress = 0.1615)")
 
 ```
+   
+   
+En 2021 on a un pattern un peu différent, avec cette fois la "fausse" placette du clapier qui se rapproche plus de celles de Vallouise, ce qui est logique puisque elle ressemble à une pelouse (terrasse alluviale très très ancienne et très végétalisée). 
 
 
-On peut ensuite étudier la trajectoire de chaque relevé. Pour cela, on réalise une NMDS générale. Problème : si les stress des NMDS réalisées par années étaient très acceptables, le stress de la NMDS globale n'est pas fou : quasiment 0.2 ! 
+On peut ensuite étudier la trajectoire de chaque relevé. Pour cela, on réalise une NMDS générale. 
 
-```{r NMDS multiDyn, echo = TRUE, results = "show", fig.show = "hide", eval = FALSE}
+```{r NMDS multiDyn, echo = TRUE, results = "hide"}
 
-nmds_1_big <- as.data.frame(dat_pourc[,-42])
-nmds_1_big <- arrange(nmds_1_big, Annee)
+nmds_1_big <- as.data.frame(dat_pourc[c(-5,-23),]) # On enleve lac torrent
 
-nmds_big <- nmds_1_big[,c(-1:-3)]
+nmds_big <- nmds_1_big[,c(-1)]
+str(nmds_big)
 
-nmds_big <- nmds_1_big[,c(1:38)] %>%
+nmds_big <- nmds_1_big %>%
 map_dfr(as.numeric)
 
 nmds_big <- as.matrix(nmds_big)
 
 set.seed(123)
-nmds_big <- metaMDS(nmds_big, trymax = 100, distance = "bray", binary = FALSE)
+nmds_tot <- metaMDS(nmds_big, trymax = 100, distance = "bray", 
+                    binary = FALSE)
+nmds_tot
 
-nmds_big
+year <- c(rep("2018",17), rep("2021",17))
 
-Annee <- rep(c("2011","2018","2021"), each = 7)
-Quadrats <- rep(c("PACO01", "PACO02", "PACO03", "PACO04", "MONT01", "NARC01", "NARC02"), 3)
+site_tot <- c(rownames(dat_pourc_18[-5,]), rownames(dat_pourc_21[-5,]))
 
-plot(nmds_big)
+couleurs <- c(rep("turquoise4",4), rep("orange",3), rep("olivedrab3",4), rep("orange",4), rep("blueviolet",2), rep("turquoise4",4), rep("orange",3), rep("olivedrab3",4), rep("orange",4), rep("blueviolet",2))
 
-MultiDyn(MultCOO = nmds_big$points, FACTime = factor(Annee), FACT2 = factor(Quadrats),
-         COL = c("#1d3554", "#DFE07C", "#7F8E39", "#42858C", "#E48F1B", "#570D32", "#E5C616", "#D33B44"), 
+MultiDyn(MultCOO = nmds_tot$points, 
+         FACTime = factor(year), 
+         FACT2 = factor(site_tot), 
+         COL = couleurs,
          ARR = TRUE) # Merci Renaud !
 
-
-
-data.scores_big <- as.data.frame(scores(nmds_big))
-
-data.scores_big$Lieu <- nmds_1_big$Lieu
-
-species.scores_big <- as.data.frame(scores(nmds_big, "species"))
-species.scores_big$species <- rownames(species.scores_big)  
-head(species.scores_big)
-
 ```
-
+Il semble y avoir un déplacement partagé vers la droite, bien marqué pour les placettes de St André, certaines de Vallouise et une de Villaroger. Il semble y avoir un lien avec la formation puisque ce sont des placettes clairement identifiées en moraine ou versant qui adoptent cette dynamique (y compris la placette de Carrelet non délimitée = carrip, disposée sur une pelouse se rapprochant d'une communauté de versant). Les placettes situées sur les alluvions se déplacent moins dans le plan de la NMDS et de façon moins uni-directionnelle.   
+Globalement, on pourrait dire que les placettes dont la richesse spécifique est la plus importante (donc les placettes situées sur les moraines et les versants) sont celles qui évoluent de plus.  
+On retrouve un peu cette tendance en regardant les indices de Jaccard (_Cf_ 3.2) mais ils ont été calculés en P/A donc c'est différent.   
+__Il faudrait regarder avec un modèle quel facteur environnemental (altitude, perturbations, géomorpho...) joue le plus sur l'indice de Jaccard. __
 
 ```{r NMDS sp 2 plot big total, echo = FALSE, results="hide", eval = FALSE}
 
+data.scores_tot <- as.data.frame(scores(nmds_tot))
+
+data.scores_tot$site <- site_tot
+
+species.scores_tot <- as.data.frame(scores(nmds_tot, "species"))
+species.scores_tot$species <- rownames(species.scores_tot)  
+head(species.scores_tot)
+
 # Ajout des variables env
-str(relev_var)
+#str(relev_var)
 
-rownames(relev_var) <- paste(relev_var$Annee,"_",relev_var$Releve)
-relev_var_moins <- relev_var[,c(-1:-5, -14, -15)]
+#rownames(relev_var) <- paste(relev_var$Annee,"_",relev_var$Releve)
+#relev_var_moins <- relev_var[,c(-1:-5, -14, -15)]
 
-str(relev_var_moins)
+#str(relev_var_moins)
 
-data.envfit_1 <- envfit(nmds_big,relev_var_moins, na.rm = TRUE)
-data.envfit_1 
+#data.envfit_1 <- envfit(nmds_big,relev_var_moins, na.rm = TRUE)
+#data.envfit_1 
 
 # https://stackoverflow.com/questions/14711470/plotting-envfit-vectors-vegan-package-in-ggplot2
-data.envfit_1_df <- as.data.frame(data.envfit_1$vectors$arrows*sqrt(data.envfit_1$vectors$r))
+#data.envfit_1_df <- as.data.frame(data.envfit_1$vectors$arrows*sqrt(data.envfit_1$vectors$r))
 
 ggplot() + 
   geom_text_repel(data = species.scores_big, aes(x = NMDS1, y = NMDS2, label = species), 

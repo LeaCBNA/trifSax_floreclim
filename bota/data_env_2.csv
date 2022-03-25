@@ -1,0 +1,37 @@
+annee;secteur;site;alti;rich;arbu;herb;sol_nu;cail_plus5;cail_moin5;croute_lit;dep_geo;type_proc_1;chute_blocs;intens_proc;freq_proc;phase_eco;d_eau_etiage;pente_mail
+2018;VENEON;BER_carrelet;1900;7;0;2;98;70;30;0;Banc alluvial;Submersion;Non;Forte;Forte;Sol nu;47;3.1
+2018;VENEON;BER_carrip;1909;18;2;80;20;10;10;5;Terrasse alluviale;Submersion;Non;Faible;Faible;Arbustive;NA;3.3
+2018;VENEON;BER_claphp;736;2;50;70;30;20;5;70;Terrasse alluviale;Submersion;Non;Moderee;Faible;Pionniere;15;3.3
+2018;VENEON;BER_lacrip;1171;15;50;20;0;10;0;80;Terrasse alluviale;Submersion;Non;Faible;Faible;Arboree;NA;0
+2018;VENEON;BER_lactor;1189;6;15;65;20;0;1;60;Banc alluvial;Submersion;Non;Forte;Forte;Arbustive;7;7.9
+2018;VALLOUISE;EYCH_meleze;1782;23;NA;30;NA;15;5;10;Terrasse alluviale;Submersion;Non;Moderee;Faible;Arbustive;80;8.8
+2018;VALLOUISE;EYCH_torr1;1756;9;0;25;44;58;19;1;Banc alluvial;Submersion;Non;Forte;Forte;Pionniere;20;1.1
+2018;VALLOUISE;EYCH_torr2;1756;5;0;NA;NA;NA;NA;NA;Banc alluvial;Submersion;Non;Forte;Forte;Pionniere;20;1.1
+2018;MAURIENNE;STANDRE_arpont;2172;11;0;60;40;15;0;0;Tablier eboulis;Submersion;Oui;Forte;Forte;Herbacee;1;32.3
+2018;MAURIENNE;STANDRE_plah;2020;15;0;55;15;30;1;1;Cone alluvial inactif;Submersion;Non;Forte;Forte;Herbacee;1;14.7
+2018;MAURIENNE;STANDRE_plabABCD;1989;NA;0;NA;NA;NA;NA;NA;Banc alluvial;Submersion;Non;Forte;Forte;Herbacee;8;4.7
+2018;MAURIENNE;STANDRE_plabEFGH;1989;23;0;65;35;20;0;0;Banc alluvial;Submersion;Non;Forte;Forte;Herbacee;8;4.7
+2018;VALLOUISE;VALL_glabl;2439;14;0;40;60;20;15;20;Moraine de fond;Submersion;Oui;Forte;Forte;Herbacee;5;37.2
+2018;VALLOUISE;VALL_morba;2150;11;0;50;48;20;20;10;Moraine laterale;Ruissellement;Oui;Faible;Forte;Herbacee;NA;25.1
+2018;VALLOUISE;VALL_morhautABC;2530;18;0;52;10;5;0;43;Moraine laterale;Ravinement;Oui;Forte;Forte;Herbacee;NA;18.1
+2018;VALLOUISE;VALL_morhautDE;2530;10;0;NA;NA;NA;NA;NA;Moraine laterale;Ravinement;Oui;Forte;Forte;Herbacee;NA;18.1
+2018;VILLAROGER;VILL_bas;2400;15;0;65;0;10;25;10;Moraine de fond;Ruissellement;Non;Faible;Forte;Herbacee;13;11.9
+2018;VILLAROGER;VIL_haut;2635;22;0;80;0;20;1;20;Moraine de fond;Ruissellement;Non;Faible;Forte;Herbacee;20;4.2
+2021;VENEON;BER_carrelet;1900;12;66;13;0;45;52;12;Banc alluvial;Submersion;Non;Forte;Forte;Sol nu;47;3.1
+2021;VENEON;BER_carrip;1909;18;0;60;0;15;10;25;Terrasse alluviale;Submersion;Non;Faible;Faible;Arbustive;NA;3.3
+2021;VENEON;BER_claphp;736;4;50;1;0;15;2;82;Terrasse alluviale;Submersion;Non;Moderee;Faible;Pionniere;15;3.3
+2021;VENEON;BER_lacrip;1171;18;45;10;0;23;2;65;Terrasse alluviale;Submersion;Non;Faible;Faible;Arboree;NA;0
+2021;VENEON;BER_lactor;1189;NA;NA;NA;NA;NA;NA;NA;Banc alluvial;Submersion;Non;Forte;Forte;Arbustive;7;7.9
+2021;VALLOUISE;EYCH_meleze;1782;30;NA;50;0;25;3;1;Terrasse alluviale;Submersion;Non;Moderee;Faible;Arbustive;80;8.8
+2021;VALLOUISE;EYCH_torr1;1756;13;0;15;1;70;5;1;Banc alluvial;Submersion;Non;Forte;Forte;Pionniere;20;1.1
+2021;VALLOUISE;EYCH_torr2;1756;8;0;20;0;50;30;0;Banc alluvial;Submersion;Non;Forte;Forte;Pionniere;20;1.1
+2021;MAURIENNE;STANDRE_arpont;2172;17;0;80;1;5;13;2;Tablier eboulis;Submersion;Oui;Forte;Forte;Herbacee;1;32.3
+2021;MAURIENNE;STANDRE_plah;2020;19;0;50;5;37;6;2;Cone alluvial inactif;Submersion;Non;Forte;Forte;Herbacee;1;14.7
+2021;MAURIENNE;STANDRE_plabABCD;1989;27;0;54;25;3;2;1;Banc alluvial;Submersion;Non;Forte;Forte;Herbacee;8;4.7
+2021;MAURIENNE;STANDRE_plabEFGH;1989;18;0;75;2;12;0;12;Banc alluvial;Submersion;Non;Forte;Forte;Herbacee;8;4.7
+2021;VALLOUISE;VALL_glabl;2439;16;0;55;4;9;12;10;Moraine de fond;Submersion;Oui;Forte;Forte;Herbacee;5;37.2
+2021;VALLOUISE;VALL_morba;2150;10;0;55;15;6;15;12;Moraine laterale;Ruissellement;Oui;Faible;Forte;Herbacee;NA;25.1
+2021;VALLOUISE;VALL_morhautABC;2530;12;0;25;1;3;7;70;Moraine laterale;Ravinement;Oui;Forte;Forte;Herbacee;NA;18.1
+2021;VALLOUISE;VALL_morhautDE;2530;20;0;20;2;7;70;1;Moraine laterale;Ravinement;Oui;Forte;Forte;Herbacee;NA;18.1
+2021;VILLAROGER;VILL_bas;2400;16;0;45;1;15;20;22;Moraine de fond;Ruissellement;Non;Faible;Forte;Herbacee;13;11.9
+2021;VILLAROGER;VIL_haut;2635;22;0;65;0;27;1;5;Moraine de fond;Ruissellement;Non;Faible;Forte;Herbacee;20;4.2

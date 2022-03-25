@@ -153,7 +153,7 @@ richness_long <- richness %>% pivot_longer(
   values_drop_na = FALSE) 
 
 student_rich <- t.test(rich_18, rich_21, paired = TRUE)
-````
+```
                     
 
 ## 2.1 Distance inter-placettes - indice de Jaccard
@@ -270,8 +270,8 @@ fviz_dend(t_dat_prabs_clus_quit_18, k = 8, palette = "Paired", cex = 0.75, lwd =
           main = "Jaccard Beta diversity - WPGMA joining cluster - 2018")
 
 ```
-D'après les relevés de 2018, les placettes de la Bérarde (sauf Carrelet ripisylve) se distinguent des autres. Cette dernière est un peu différente car elle est située sur une terrasse alluviale très ancienne, largement végétalisée et se rapprochant d'une pelouse. Elle est d'ailleurs proche de la placette du bas de moraine de Vallouise. Surprenamment, la placette du torrent de l'Eychaude se rapproche des placettes de Maurienne.    
-__Attention :__ il faut rappeller que seules les espèces sont prises en comptes dans la comparaison, les recouvrements végétaux n'interviennent pas. 
+D'après les relevés de 2018, les placettes de la Bérarde (sauf Carrelet ripisylve) se distinguent des autres. Cette dernière est un peu différente car elle est située sur une terrasse alluviale très ancienne, largement végétalisée et se rapprochant d'une pelouse. Les placettes de Maurienne sont bien individualisées. Les placettes de Vallouise moraine haut et glacier sont proches. Surprenamment, celles de Villaroger se rapprochent de la placette moraine bas.    
+__Attention :__ il faut rappeler que seules les espèces sont prises en compte dans la comparaison, les recouvrements végétaux n'interviennent pas. 
 
 ### 2.1.3 Représentation de la proximité floristique (présence/absence) 2D : NMDS
 
@@ -330,8 +330,7 @@ head(species.scores_18)  # look at the data
 
 # display.brewer.pal(n = 9, "Paired")
 # brewer.pal(n = 9, "Paired")
-col_paired <- c("#A6CEE3","#FF7F00","#1F78B4","#B2DF8A","#1F78B4","#33A02C","#E31A1C","#E31A1C",
-                "#FB9A99","#FF7F00","#FDBF6F","#FDBF6F","#FB9A99","#E31A1C","#FB9A99")
+col_paired <- c(rep("turquoise4",5), "orange", rep("olivedrab3",2), rep("orange",2), rep("blueviolet",2), "orange", "olivedrab3", "orange")
 
 ggplot() + 
     geom_point(data = data.scores_18, aes(x=NMDS1, y=NMDS2), size = 4, shape = 17, col = col_paired) + 
@@ -361,7 +360,7 @@ ms21 <- mean(d_21)
 L'indice de Sorensen moyen entre tous les sites en 2018 est de `ms18` et de `ms21`en 2021. 
 
 
-# 3 Comparaison inter-années
+# 3. Comparaison inter-années
 
 ## 3.1 Diversité spécifique
 
@@ -377,7 +376,7 @@ ggplot(richness_long, aes(x = site_18, y = rich, fill = year)) +
 
 ```
 
-Sur 12 des 14 sites on a en 2021 plus de taxons observés qu'en 2018. 
+Sur 11 des 14 sites on a en 2021 plus de taxons observés qu'en 2018. 
 Plusieurs hypothèses :    
 + + + c'est un biais observateur, plus forte détection en 2021 pour différentes raisons (date et avancement de la végétation, temps passé sur la placette...) mais paraît peu probable d'une part car cette tendance est la même sur l'ensemble des sites et d'autre part car à priori ce biais s'exprimerait plus sur les abondances que sur la présence/absence ;    
 + + + il y a réellement une augmentaton de la diversité spécifique sur les plots en lien avec la végétalisation des dépôts alluviaux et des moraines ;    
@@ -446,12 +445,11 @@ df_v_dist %>%
 ```
 
 
-Certaines placettes ont une faible similarité (Villaroger haut, Vallouise Glacier blanc) indiquant un grand changement de la composition entre 2018 et 2021. La majorité des indices tourne entre 0.5 et 0.75. C'est sur Bérarde Clapier que la similarité 2018/2021 est la plus importante. 
+Certaines placettes ont une forte similarité (Villaroger haut, Vallouise Glacier blanc, Bérarde Plan du Lac ripisylve) indiquant peu de changement de la composition entre 2018 et 2021. La majorité des indices tourne entre 0.4 et 0.6. C'est sur Vallouise moraine bas que la dissimilarité 2018/2021 est la plus importante. 
 
 
 
-
-`Specpool` permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). ici, sur 84 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. Ca reste à creuser et ce n'est peut-être pas si intéressant.    
+`Specpool` permet d'estimer le nombre de taxons non détectés selon plusieurs méthodes (Chao, Jackknife, Bootstrap). Ici, sur 94 taxons identifiées sur l'ensemble des sites en 2018, il y aurait entre 103 et 161 taxons suivant la méthode de calcul utilisée. Ca reste à creuser et ce n'est peut-être pas si intéressant.    
 
 
 
@@ -577,7 +575,7 @@ setdiff(chr_list_21$EYCH_meleze21, chr_list_18$EYCH_meleze18)
 setdiff(chr_list_18$EYCH_meleze18, chr_list_21$EYCH_meleze21)
 ```
 
-De nombreuses espèces suplémentaires en 21 mais on est sur une placette très grande donc il y a probabalement de la sous-observation en 18.
+De nombreuses espèces suplémentaires en 21 mais on est sur une placette très grande donc il y a probablement de la sous-observation en 18. Et peut-être des erreurs de détermination. 
 
 
 
@@ -656,9 +654,6 @@ ggplot(prov_long, aes(x = type, y = nombre, fill = site)) +
 
 ## 3.4 Représentation de la proximité floristique (abondance) et des trajectoires inter-années 2D : NMDS
 
-A faire : analyses avec l'abondance -> NMDS et trajectoires comme Renaud (Juncus squarrosus)
-ATTENTION c'est de vrac copié ds analyses Juncus !
-
 Certaines placettes sont scindées en plusieurs morceaux et les relevés bota ont été réalisés séparément. Il faudrait merger les abondances pour renseigner la liste de taxons pour un site sur une seule colonne. 
 
 De plus, on a certains taxons dont on ne connaît pas l'abondance et les NA ne sont pas acceptés pour calculer les NMDS. On les remplace mannuellement par la valeur de 2021. 
@@ -678,6 +673,7 @@ which(is.na(dat_pourc),arr.ind=TRUE) # Remplacement des NA par leur valeur de 20
 
 dat_pourc[131,6] <- dat_pourc[274,6] 
 dat_pourc[135,9] <- dat_pourc[277,9] 
+dat_pourc[95,10] <- dat_pourc[237,10] 
 dat_pourc[105,10] <- dat_pourc[243,10] 
 dat_pourc[132,10] <- dat_pourc[274,10] 
 dat_pourc[136,10] <- dat_pourc[278,10] 
@@ -709,6 +705,12 @@ dat_pourc <- rbind.data.frame(dat_pourc_18, dat_pourc_21)
 year <- c(rep("2018",18), rep("2021",18))
 dat_pourc <- cbind(year,dat_pourc)
 
+str(dat_pourc)
+
+dat_pourc[,c(-1)] <- dat_pourc[,c(-1)] %>%
+map_dfr(as.numeric)
+
+str(dat_pourc)
 ```
 
 
@@ -781,12 +783,12 @@ ggplot() +
         panel.grid.major = element_blank(),  
         panel.grid.minor = element_blank(), 
         plot.background = element_blank()) +
-  ggtitle(label = "NMDS 2018 (stress = 0.1936)")
+  ggtitle(label = "NMDS 2018 (stress = 0.2155)")
 
 ```
-Sans surprise on retrouve deux pools constitués respectivement des placettes de Maurienne et de Villaroger qui se rapprochent floristiquement. Ces deux pools sont relativement proches entre eux, et se rapprochent également des placettes de Vallouise, qui ne forment pas un pool distinct mais se répartissent autour des deux précédents. __A noter les sous-placettes qu'il faudrait regrouper, celles de la placette Vallouise_moraine_haut se retrouvent proches mais celles d'Eychauda torrent sont assez éloignées.__  
+Sans surprise on retrouve deux pools constitués respectivement des placettes de Maurienne et de Villaroger qui se rapprochent floristiquement. Ces deux pools sont relativement proches entre eux, et se rapprochent également des placettes du haut de la moraine de Vallouise. On a un gradient altitudinal du bas vers le haut de la figure. __A noter les sous-placettes qu'il faudrait regrouper, celles de la placette Vallouise_moraine_haut se retrouvent proches mais celles d'Eychauda torrent sont assez éloignées.__  
 
-Les placettes de La Bérarde sont bien distinctes, entre elles et avec toutes les placettes de Maurienne, Vallouise et Villaroger. On a une ségrégation horizontale entre les domaines versant/moraine et fluvio-glaciaire.  
+Les placettes de La Bérarde sont bien distinctes de toutes les placettes de Maurienne, Vallouise et Villaroger ; elles se rapprochent des placettes de l'Eychauda torrent. On a une ségrégation horizontale entre les domaines versant/moraine et fluvio-glaciaire.  
 
 
 ``` {r NMDS sp ab 2021, echo = TRUE, results = "hide", fig.show = "hide"}
@@ -855,12 +857,12 @@ ggplot() +
         panel.grid.major = element_blank(),  
         panel.grid.minor = element_blank(), 
         plot.background = element_blank()) +
-  ggtitle(label = "NMDS 2021 (stress = 0.1615)")
+  ggtitle(label = "NMDS 2021 (stress = 0.1620)")
 
 ```
    
    
-En 2021 on a un pattern un peu différent, avec cette fois la "fausse" placette du clapier qui se rapproche plus de celles de Vallouise, ce qui est logique puisque elle ressemble à une pelouse (terrasse alluviale très très ancienne et très végétalisée). 
+En 2021 on a un pattern un peu différent, avec cette fois la "fausse" placette du carrelet (rip) qui se rapproche plus de celles de Vallouise, ce qui est logique puisque elle ressemble à une pelouse (terrasse alluviale très ancienne et très végétalisée). 
 
 
 On peut ensuite étudier la trajectoire de chaque relevé. Pour cela, on réalise une NMDS générale. 
@@ -872,7 +874,7 @@ nmds_1_big <- as.data.frame(dat_pourc[c(-5,-23),]) # On enleve lac torrent
 nmds_big <- nmds_1_big[,c(-1)]
 str(nmds_big)
 
-nmds_big <- nmds_1_big %>%
+nmds_big <- nmds_big %>%
 map_dfr(as.numeric)
 
 nmds_big <- as.matrix(nmds_big)
@@ -897,43 +899,61 @@ MultiDyn(MultCOO = nmds_tot$points,
 ```
 Il semble y avoir un déplacement partagé vers la droite, bien marqué pour les placettes de St André, certaines de Vallouise et une de Villaroger. Il semble y avoir un lien avec la formation puisque ce sont des placettes clairement identifiées en moraine ou versant qui adoptent cette dynamique (y compris la placette de Carrelet non délimitée = carrip, disposée sur une pelouse se rapprochant d'une communauté de versant). Les placettes situées sur les alluvions se déplacent moins dans le plan de la NMDS et de façon moins uni-directionnelle.   
 Globalement, on pourrait dire que les placettes dont la richesse spécifique est la plus importante (donc les placettes situées sur les moraines et les versants) sont celles qui évoluent de plus.  
-On retrouve un peu cette tendance en regardant les indices de Jaccard (_Cf_ 3.2) mais ils ont été calculés en P/A donc c'est différent.   
+ 
 __Il faudrait regarder avec un modèle quel facteur environnemental (altitude, perturbations, géomorpho...) joue le plus sur l'indice de Jaccard. __
 
-```{r NMDS sp 2 plot big total, echo = FALSE, results="hide", eval = FALSE}
+```{r NMDS sp 2 plot big total, echo = FALSE, results="hide"}
 
 data.scores_tot <- as.data.frame(scores(nmds_tot))
 
 data.scores_tot$site <- site_tot
+data.scores_tot$annee <- year
+data.scores_tot$secteur <- c(rep("VENEON",4), rep("VALLOUISE",3), rep("MAURIENNE",4), rep("VALLOUISE",4), rep("VILLAROGER",2))
 
 species.scores_tot <- as.data.frame(scores(nmds_tot, "species"))
 species.scores_tot$species <- rownames(species.scores_tot)  
 head(species.scores_tot)
 
+
 # Ajout des variables env
-#str(relev_var)
 
-#rownames(relev_var) <- paste(relev_var$Annee,"_",relev_var$Releve)
-#relev_var_moins <- relev_var[,c(-1:-5, -14, -15)]
+relev_var <- read.table("data_env_2.csv", header=T, sep=";", dec=".")
 
-#str(relev_var_moins)
+str(relev_var)
 
-#data.envfit_1 <- envfit(nmds_big,relev_var_moins, na.rm = TRUE)
-#data.envfit_1 
+relev_var[,c(1,2,3,12:17)] <- relev_var[,c(1,2,3,12:17)]  %>%
+map_dfr(as.factor)
+
+str(relev_var)
+
+rownames(relev_var) <- paste(relev_var$site,"_",relev_var$annee)
+relev_var_moins <- relev_var[c(-5,-23),c(-1:-3)] #on enlève aussi lac torrent
+
+
+data.envfit_1 <- envfit(nmds_tot,relev_var_moins, na.rm = TRUE)
+data.envfit_1 
 
 # https://stackoverflow.com/questions/14711470/plotting-envfit-vectors-vegan-package-in-ggplot2
-#data.envfit_1_df <- as.data.frame(data.envfit_1$vectors$arrows*sqrt(data.envfit_1$vectors$r))
+data.envfit_1_df <- as.data.frame(data.envfit_1$vectors$arrows*sqrt(data.envfit_1$vectors$r))
 
-ggplot() + 
-  geom_text_repel(data = species.scores_big, aes(x = NMDS1, y = NMDS2, label = species), 
-                  alpha = 0.5,  color = "grey70") +
-  geom_point(data = data.scores_big, aes(x = NMDS1, y = NMDS2, color = Quadrats, pch = Annee), 
-             size = 3.5, alpha = 0.5) +
-  geom_point(data = species.scores_big, aes(x = NMDS1, y = NMDS2,), size = 2, pch = 1,
+
+data.scores_tot <- data.scores_tot %>% 
+                   separate (site, c("sect", "site"), sep = "_")
+
+
+ggplot(data = data.scores_tot, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(colour = secteur, 
+             pch = annee, label = site), size = 3.5, alpha = 0.5) +
+  geom_point(data = species.scores_tot, aes(x = NMDS1, y = NMDS2), size = 2, pch = 1,
              color = "grey70") +
-  coord_equal() +
+  geom_label_repel(aes(label = site, colour = secteur),
+                  box.padding   = 0.35, 
+                  point.padding = 0.5,
+                  segment.color = 'grey50',
+                  fill = "white",
+                  size = 3) +
   theme_bw() + 
-  scale_color_jcolors(palette = "pal7") +
+  scale_color_manual(values = c("olivedrab3", "orange", "turquoise4", "blueviolet")) +
   theme(axis.text.x = element_blank(),  
         axis.text.y = element_blank(), 
         axis.ticks = element_blank(),  
@@ -946,7 +966,95 @@ ggplot() +
   geom_segment(data = data.envfit_1_df, aes(x=0, xend = NMDS1, y=0, yend = NMDS2), 
                arrow = arrow(length = unit(0.25, "cm"))) +
   geom_text_repel(data = data.envfit_1_df,aes(x = NMDS1,y = NMDS2, 
-                                        label = rownames(data.envfit_1_df)), size = 3.5)
+                                        label = rownames(data.envfit_1_df)), size = 3.5) +
+  ggtitle(label = "NMDS totale (stress = 0.2341)")
 
 
 ```
+
+
+```{r NMDS sp 2 plot big total species, echo = FALSE, results="hide", eval = FALSE}
+
+# modifier
+
+species.scores_tot <- species.scores_tot %>% 
+                    separate(species, c("Genus", "Species"), sep = " ")
+
+species.scores_tot$Genus_sort <- str_sub(species.scores_tot$Genus,1,3)
+species.scores_tot$Species_sort <- str_sub(species.scores_tot$Species,1,3)
+
+species.scores_tot <- species.scores_tot %>% 
+                    unite(Short, c("Genus_sort", "Species_sort"), sep = "_")
+
+
+
+ggplot(species.scores_tot, aes(x = NMDS1, y = NMDS2)) + 
+    geom_point(aes(label = Short), size = 2, pch = 1,
+             color = "grey70") +
+    geom_label_repel(aes(label = Short),
+                  box.padding   = 0.35, 
+                  point.padding = 0.5,
+                  segment.color = 'grey50',
+                  fill = "white",
+                  size = 3) +
+  geom_point(data = data.scores_tot, aes(x = NMDS1, y = NMDS2, colour = secteur, 
+             pch = annee, label = site), size = 3.5, alpha = 0.5) +
+  theme_bw() + 
+  scale_color_manual(values = c("olivedrab3", "orange", "turquoise4", "blueviolet"))
+
+
+
+```
+
+De la même façon qu'une comparaison de moyennes avec `anova`, on compare ici les compositions des commuanutés de chaque placette avec le test `anosim`. La placette Plan du Lac - torrent (Bérarde) est supprimée. 
+
+"The ANOSIM statistic compares the mean of ranked dissimilarities between groups to the mean of ranked dissimilarities within groups. An R value close to "1.0" suggests dissimilarity between groups while an R value close to "0" suggests an even distribution of high and low ranks within and between groups. R values below "0" suggest that dissimilarities are greater within groups than between groups. See Clarke and Gorley (2001) for a guide to interpreting ANOSIM R values." https://sites.google.com/site/mb3gustame/hypothesis-tests/anosim
+
+```{r NMDS anosim, echo = TRUE, results = "show"}
+
+anosim(dat_pourc[c(-5,-23),-1], grouping = dat_pourc[c(-5,-23),]$year, permutations = 999, distance = "bray", strata = NULL, parallel = getOption("mc.cores")) # total
+
+```
+Ici, la R value est proche de 0, il y a donc une dissimilarité ~ équivalente entre les groupes (2018/2021) et à l'intérieur de ces groupes, donc inter-placettes (p-value = 0.19). La dissimilarité 2018/2021 est donc faible. 
+
+
+  
+    
+# 4. variables environnementales
+
+Les recouvrements de sol nu ne sont pas fiables car la prise de données a été différente en 2018 et 2021 (prise en compte de la litière dans un cas). On se concentre sur le recouvrement herbacé, qui est à la fois le plus fiable et celui qui concerne toutes les placettes (contrairement au recouvrement arbustif qui est présent uniquement sur certaines). 
+
+```{r plots env, echo = FALSE, results = "hide"}
+
+ggplot(relev_var, aes(x = annee, y = herb, fill = annee, colour = annee)) +
+    geom_boxplot(alpha = 0.5, notch = TRUE, outlier.alpha = 0) +
+    geom_jitter(width = 0.05) +
+    geom_line(aes(group = site), colour = "gray50") +
+    theme(legend.position = "none") +
+    theme_bw() +
+    scale_fill_jcolors(palette = "pal5") +
+    scale_color_jcolors(palette = "pal5") +
+    ggtitle(label = "Recouvrement herbacé, trajectoire(s)")
+
+tapply(relev_var$rich, relev_var$annee, summary)
+
+tapply(relev_var$herb, relev_var$annee, summary)
+
+tapply(relev_var$arbu, relev_var$annee, summary)
+
+tapply(relev_var$sol_nu, relev_var$annee, summary)
+
+tapply(relev_var$cail_plus5, relev_var$annee, summary)
+
+tapply(relev_var$cail_moin5, relev_var$annee, summary)
+
+tapply(relev_var$croute_lit, relev_var$annee, summary)
+
+```
+
+```{r var rec herb kruskall, results = "hide", figure = "hide", echo = TRUE}
+res.kruskal_annee <- relev_var %>% kruskal.test(herb ~ annee, paired = TRUE)
+res.kruskal_annee
+```
+Le recouvrement herbacé est significativement différent entre 2018 et 2021. 
+

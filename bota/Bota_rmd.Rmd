@@ -1052,7 +1052,7 @@ tapply(relev_var$croute_lit, relev_var$annee, summary)
 
 ```
 
-```{r var rec herb kruskall, results = "hide", figure = "hide", echo = TRUE}
+```{r var rec herb kruskall, echo = TRUE}
 res.kruskal_annee <- relev_var %>% kruskal.test(herb ~ annee, paired = TRUE)
 res.kruskal_annee
 ```
